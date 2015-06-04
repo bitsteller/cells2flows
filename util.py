@@ -185,6 +185,7 @@ class MapReduce(object):
 			length = len(inputs)
 
 		#map
+		start = time.time()
 		tasks_finished = 0
 		result = []
 		mapped = []
@@ -212,7 +213,8 @@ class MapReduce(object):
 					result = reduced
 
 			tasks_finished += 1
-			sys.stderr.write('\rdone {0:%}'.format(float(tasks_finished)/length))
+			est = datetime.datetime.now() + datetime.timedelta(seconds = (time.time()-start)/tasks_finished*(length-tasks_finished))
+			sys.stderr.write('\rdone {0:%}'.format(float(tasks_finished)/length) + "  ETA " + est.strftime("%Y-%m-%d %H:%M"))
 
 		#partition
 		partitioned_data = []
