@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import util, config #local modules
 
 def user_positions(line):
-	"""Extracts the positions from a trajectory line in a STEM csv file
+	"""Deprecated. Used for extracting antennas from sample only. Extracts the positions from a trajectory line in a STEM csv file. 
 	Args:
 		line: the linestring from the csv file
 	Returns:
@@ -21,7 +21,7 @@ def user_positions(line):
 	return result
 
 def count(item):
-	"""Aggregates values by addition.
+	"""Deprecated. Used for extracting antennas from sample only. Aggregates values by addition.
 	Args:
 		item: a tuple (key, values) where values is a sequence of numbers
 	Returns:
@@ -31,6 +31,14 @@ def count(item):
 	return (key, sum(count))
 
 def antenna_position(args):
+	"""Parses a line of an antenna csv
+	Args:
+		args: a tuple (i, line), where i is the line number and line the a one-line string from the antenna csv
+	Returns:
+		A list [((cellid, lon, lat, srid),1)] where cellid is either parsed by util.parse_antenna() or if no specific id is available, 
+		the linenumber is used as the antenna id and lon, lat are the coordinates of the antenna in the 
+		coordinate system specified by srid"""
+
 	i, line = args
 	a = util.parse_antenna(line)
 	if len(a) == 3:
@@ -41,6 +49,12 @@ def antenna_position(args):
 		raise ValueError("parse_antenna() must return 3- or 4-tuple")
 
 def upload_antenna(args):
+	"""Uploads an antenna position to the database.
+	Args:
+		args: a tuple ((cellid, lon, lat, srid), values), where values is a list that is ignored and the other variables 
+		are the attributes of the antenna
+	"""
+
 	key, values = args
 
 	conn = util.db_connect()
@@ -89,6 +103,11 @@ def calculate_voronoi():
 	mapper(data)
 
 def upload_voronoi(args):
+	"""Uploads a Voronoi cell polygon to the DB.
+	Args:
+		args: a tuple (cell, lon, lat, geom), where cell is the cellid, lon/lat the original cell tower position and geom a postgis
+		LINESTRING describing the Voronoi polygon
+	"""
 	cell, lon, lat, geom = args
 
 	conn = util.db_connect()
@@ -129,10 +148,10 @@ if __name__ == '__main__':
 	cur.execute(open("SQL/01_Loading/create_ant_pos.sql", 'r').read())
 	conn.commit()
 
+	#DEPRECATED: read antenna positions from STEM sample
 	#Find unique antennas from sample
 	#mapper = util.MapReduce(user_positions, count, num_workers = 4) #add flows 
 	#unique_antennas = mapper(open(config.SAMPLE_FILENAME, 'r').readlines(), length = config.SAMPLE_SIZE)
-
 	#print("Uploading to database...")
 	#sql = "INSERT INTO ant_pos (lon, lat, geom) VALUES (%s,%s, ST_SetSRID(ST_MakePoint(%s,%s),4326));"
 	#cur.executemany(sql, [(lon, lat, lon, lat) for (lat, lon), count in unique_antennas])
