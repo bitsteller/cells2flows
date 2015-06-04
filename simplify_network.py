@@ -6,9 +6,15 @@ import util, config #local modules
 def simplify(cell):
 	conn = util.db_connect()
 	cur = conn.cursor()
-	cur.execute(open("SQL/02_Network_Simplification/simplify_step2.sql", 'r').read(), {"cell": cell})
+	try:
+		cur.execute(open("SQL/02_Network_Simplification/simplify_step2.sql", 'r').read(), {"cell": cell})
+	except psycopg2.IntegrityError, e:
+		if "duplicate key value" in e.pgerror:
+			pass
+		else:
+			raise e
+
 	conn.commit()
-	return []
 
 def signal_handler(signal, frame):
 	global mapper, request_stop
@@ -41,5 +47,5 @@ if __name__ == '__main__':
 	conn.commit()
 
 	print("Simplifing network (step 2/2)...")
-	mapper = util.MapReduce(simplify, lambda x: x, num_workers = 4)
+	mapper = util.ParMap(simplify)
 	mapper(config.CELLS, chunksize = 1)
