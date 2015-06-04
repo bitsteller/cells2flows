@@ -1,4 +1,4 @@
-import collections, sys, itertools, multiprocessing, re, datetime
+import collections, sys, itertools, multiprocessing, re, datetime, time
 import psycopg2
 
 import config
@@ -274,6 +274,7 @@ class ParMap(MapReduce):
 
 		#map
 		tasks_finished = 0
+		start = time.time()
 		result = []
 		for response in self.mappool.imap_unordered(self.map_func, inputs, chunksize=chunksize):
 			result.append(response)
@@ -281,7 +282,8 @@ class ParMap(MapReduce):
 				return
 
 			tasks_finished += 1
-			sys.stderr.write('\rdone {0:%}'.format(float(tasks_finished)/length))
-		
+			est = datetime.datetime.now() + datetime.timedelta(seconds = (time.time()-start)/tasks_finished*(length-tasks_finished))
+			sys.stderr.write('\rdone {0:%}'.format(float(tasks_finished)/length) + "  ETA " + est.strftime("%Y-%m-%d %H:%M"))
+
 		print("")
 		return result
