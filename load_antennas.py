@@ -82,21 +82,21 @@ def calculate_voronoi():
 		points.append([lon, lat])
 
 	#add fake extreme points to bound Voronoi diagram
-	points.append([config.BBOX["top"] + 10.0, config.BBOX["left"]-10.0])
-	points.append([config.BBOX["bottom"] - 10.0, config.BBOX["left"]-10.0])
-	points.append([config.BBOX["top"] + 10.0, config.BBOX["right"]+10.0])
-	points.append([config.BBOX["bottom"] - 10.0, config.BBOX["right"]+10.0])
-	points = np.array(points)
+	points.append([config.BBOX["top"] + 1.0, config.BBOX["left"]-1.0])
+	points.append([config.BBOX["bottom"] - 1.0, config.BBOX["left"]-1.0])
+	points.append([config.BBOX["top"] + 1.0, config.BBOX["right"]+1.0])
+	points.append([config.BBOX["bottom"] - 1.0, config.BBOX["right"]+1.0])
+	points = np.array([(x-config.BBOX["bottom"], y - config.BBOX["left"]) for x, y in points]) #transform close to 0 to prevent float precison errors
 
 	from scipy.spatial import Voronoi
-	vor = Voronoi(points)
+	vor = Voronoi(points, qhull_options="QJ")
 
 	data = []
 	for i, cell in enumerate(cells): #skip fake points
 		vertices = [tuple(vor.vertices[v]) for v in vor.regions[vor.point_region[i]] if vor.point_region[i] >= 0 and v >= 0]
 		if len(vertices) >= 3:
-			linestr = "LINESTRING (" + ",".join([str(lat) + " " + str(lon) for lon, lat in vertices + [vertices[0]]]) + ")"
-			data.append((cell, points[i][0], points[i][1], linestr))
+			linestr = "LINESTRING (" + ",".join([str(lat + config.BBOX["left"]) + " " + str(lon + config.BBOX["bottom"]) for lon, lat in vertices + [vertices[0]]]) + ")"
+			data.append((cell, points[i][0] + config.BBOX["bottom"], points[i][1] + config.BBOX["left"], linestr))
 
 	print("Uploading Voronoi partition...")
 	mapper = util.ParMap(upload_voronoi)
