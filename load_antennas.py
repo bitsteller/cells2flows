@@ -68,63 +68,64 @@ def upload_antenna(args):
 
 	return None
 
-def calculate_voronoi():
-	"""Calculates the Voronoi diagram for the antennas in the ant_pos table and uploads the resulting polygons to the voronoi table"""
-	conn = util.db_connect()
-	cur = conn.cursor()
+#DEPRECATED (inaccurate) Voronoi calculation
+# def calculate_voronoi():
+# 	"""Calculates the Voronoi diagram for the antennas in the ant_pos table and uploads the resulting polygons to the voronoi table"""
+# 	conn = util.db_connect()
+# 	cur = conn.cursor()
 
-	cur.execute("SELECT id, lat, lon FROM ant_pos")
+# 	cur.execute("SELECT id, lat, lon FROM ant_pos")
 
-	cells = []
-	points = []
-	for cell, lat, lon in cur.fetchall():
-		cells.append(cell)
-		points.append([lon, lat])
+# 	cells = []
+# 	points = []
+# 	for cell, lat, lon in cur.fetchall():
+# 		cells.append(cell)
+# 		points.append([lon, lat])
 
-	#add fake extreme points to bound Voronoi diagram
-	points.append([config.BBOX["top"] + 1.0, config.BBOX["left"]-1.0])
-	points.append([config.BBOX["bottom"] - 1.0, config.BBOX["left"]-1.0])
-	points.append([config.BBOX["top"] + 1.0, config.BBOX["right"]+1.0])
-	points.append([config.BBOX["bottom"] - 1.0, config.BBOX["right"]+1.0])
-	points = np.array([(x-config.BBOX["bottom"], y - config.BBOX["left"]) for x, y in points]) #transform close to 0 to prevent float precison errors
+# 	#add fake extreme points to bound Voronoi diagram
+# 	points.append([config.BBOX["top"] + 1.0, config.BBOX["left"]-1.0])
+# 	points.append([config.BBOX["bottom"] - 1.0, config.BBOX["left"]-1.0])
+# 	points.append([config.BBOX["top"] + 1.0, config.BBOX["right"]+1.0])
+# 	points.append([config.BBOX["bottom"] - 1.0, config.BBOX["right"]+1.0])
+# 	points = np.array([(x-config.BBOX["bottom"], y - config.BBOX["left"]) for x, y in points]) #transform close to 0 to prevent float precison errors
 
-	from scipy.spatial import Voronoi
-	vor = Voronoi(points, qhull_options="QJ")
+# 	from scipy.spatial import Voronoi
+# 	vor = Voronoi(points, qhull_options="QJ")
 
-	data = []
-	for i, cell in enumerate(cells): #skip fake points
-		vertices = [tuple(vor.vertices[v]) for v in vor.regions[vor.point_region[i]] if vor.point_region[i] >= 0 and v >= 0]
-		if len(vertices) >= 3:
-			linestr = "LINESTRING (" + ",".join([str(lat + config.BBOX["left"]) + " " + str(lon + config.BBOX["bottom"]) for lon, lat in vertices + [vertices[0]]]) + ")"
-			data.append((cell, points[i][0] + config.BBOX["bottom"], points[i][1] + config.BBOX["left"], linestr))
+# 	data = []
+# 	for i, cell in enumerate(cells): #skip fake points
+# 		vertices = [tuple(vor.vertices[v]) for v in vor.regions[vor.point_region[i]] if vor.point_region[i] >= 0 and v >= 0]
+# 		if len(vertices) >= 3:
+# 			linestr = "LINESTRING (" + ",".join([str(lat + config.BBOX["left"]) + " " + str(lon + config.BBOX["bottom"]) for lon, lat in vertices + [vertices[0]]]) + ")"
+# 			data.append((cell, points[i][0] + config.BBOX["bottom"], points[i][1] + config.BBOX["left"], linestr))
 
-	print("Uploading Voronoi partition...")
-	mapper = util.ParMap(upload_voronoi)
-	mapper(data)
+# 	print("Uploading Voronoi partition...")
+# 	mapper = util.ParMap(upload_voronoi)
+# 	mapper(data)
 
-def upload_voronoi(args):
-	"""Uploads a Voronoi cell polygon to the DB.
-	Args:
-		args: a tuple (cell, lon, lat, geom), where cell is the cellid, lon/lat the original cell tower position and geom a postgis
-		LINESTRING describing the Voronoi polygon
-	"""
-	cell, lon, lat, geom = args
+# def upload_voronoi(args):
+# 	"""Uploads a Voronoi cell polygon to the DB.
+# 	Args:
+# 		args: a tuple (cell, lon, lat, geom), where cell is the cellid, lon/lat the original cell tower position and geom a postgis
+# 		LINESTRING describing the Voronoi polygon
+# 	"""
+# 	cell, lon, lat, geom = args
 
-	conn = util.db_connect()
-	cur = conn.cursor()
+# 	conn = util.db_connect()
+# 	cur = conn.cursor()
 
-	bboxpoints = [	(config.BBOX["top"], config.BBOX["left"]),
-					(config.BBOX["top"], config.BBOX["right"]),
-					(config.BBOX["bottom"], config.BBOX["right"]),
-					(config.BBOX["bottom"], config.BBOX["left"])]
-	bboxstr = "LINESTRING (" + ",".join([str(lat) + " " + str(lon) for lon, lat in bboxpoints + [bboxpoints[0]]]) + ")"
+# 	bboxpoints = [	(config.BBOX["top"], config.BBOX["left"]),
+# 					(config.BBOX["top"], config.BBOX["right"]),
+# 					(config.BBOX["bottom"], config.BBOX["right"]),
+# 					(config.BBOX["bottom"], config.BBOX["left"])]
+# 	bboxstr = "LINESTRING (" + ",".join([str(lat) + " " + str(lon) for lon, lat in bboxpoints + [bboxpoints[0]]]) + ")"
 
-	sql = "	INSERT INTO voronoi (id, lon, lat, geom) \
-			WITH bbox AS (SELECT ST_SetSRID(ST_MakePolygon(ST_GeomFromText(%(bbox)s)),4326) AS poly)\
-		   	SELECT %(cell)s,%(lon)s,%(lat)s,\
-		   	(ST_Dump(ST_Intersection(bbox.poly, ST_SetSRID(ST_MakePolygon(ST_GeomFromText(%(geom)s)),4326)))).geom FROM bbox;"
-	cur.execute(sql, {"cell": cell, "lon": lon, "lat": lat, "geom": geom, "bbox": bboxstr})
-	conn.commit()
+# 	sql = "	INSERT INTO voronoi (id, lon, lat, geom) \
+# 			WITH bbox AS (SELECT ST_SetSRID(ST_MakePolygon(ST_GeomFromText(%(bbox)s)),4326) AS poly)\
+# 		   	SELECT %(cell)s,%(lon)s,%(lat)s,\
+# 		   	(ST_Dump(ST_Intersection(bbox.poly, ST_SetSRID(ST_MakePolygon(ST_GeomFromText(%(geom)s)),4326)))).geom FROM bbox;"
+# 	cur.execute(sql, {"cell": cell, "lon": lon, "lat": lat, "geom": geom, "bbox": bboxstr})
+# 	conn.commit()
 
 def signal_handler(signal, frame):
 	global mapper, request_stop
@@ -172,6 +173,11 @@ if __name__ == '__main__':
 	cur.execute(open("SQL/01_Loading/create_voronoi.sql", 'r').read())
 	conn.commit()
 
-	print("Calculating Voronoi partition...")
-	calculate_voronoi()
+	print("Creating voronoi() function...")
+	cur.execute(open("SQL/01_Loading/create_voronoi_func.sql", 'r').read())
+	conn.commit()
 
+	print("Calculating Voronoi partition...")
+	cur.execute("INSERT INTO voronoi SELECT v.id, v.geom FROM voronoi('ant_pos', 'geom') AS v(id numeric(10,0), geom geometry(Polygon,4326))")
+	conn.commit()
+	#calculate_voronoi() #DEPRECATED
