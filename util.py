@@ -29,6 +29,22 @@ def parse_antenna(linestr):
 	lon, lat = re.match(r"([0-9.]+),([0-9.]+)",linestr).groups()
 	return (float(lon), float(lat), 32611)
 
+def parse_trip(linestr):
+	"""Reads a line from a trip csv file
+	Args:
+		linestr: one-line string from the a trip csv file
+	Returns:
+		A list of tuples (userid, cellpath) containing the user id and a list of visited cell on the trip"""
+
+	try:
+		data = re.match(r"([0-9]+),([01]),([0-9.]+),([0-9.]+),([0-9 ]+)",linestr).groups()
+		userid, commute_direction, orig_TAZ, dest_TAZ, cellpathstr = data
+		cellpath = [int(cell) for cell in cellpathstr.strip(" ").split(" ")]
+		return (userid, cellpath)
+	except Exception, e:
+		print("Line '" + linestr + "' could not be parsed and will be ignored, because " + unicode(e))
+		return None
+
 def confirm(prompt_str, allow_empty=False, default=False):
 	"""Prompts the user to confirm an action and returns the users decision.
 	Args:
