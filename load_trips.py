@@ -71,5 +71,5 @@ if __name__ == '__main__':
 	#parse trips
 	print("Loading trips...")
 	mapper = util.MapReduce(read_trip, upload_trip, num_workers = 4)
-	trips = mapper(enumerate(open(config.TRIPS_FILE, 'r').xreadlines()), length = linecount, pipe = True, chunksize = 10, out = False)
+	trips = mapper(enumerate(open(config.TRIPS_FILE, 'r').xreadlines()), length = linecount, pipe = True, chunksize = 1000, out = False)
 	conn.commit()

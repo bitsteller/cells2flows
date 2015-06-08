@@ -190,7 +190,7 @@ class MapReduce(object):
 
 	def xinputs(self, inputs):
 		for value in inputs:
-			while self.enqueued - self.tasks_finished > 1000*self.chunksize:
+			while self.enqueued - self.tasks_finished > 100*self.chunksize:
 				time.sleep(1)
 			self.enqueued += 1
 			yield value
