@@ -182,8 +182,8 @@ class MapReduce(object):
 
 	def stop(self):
 		self.request_stop = True
-		self.mappool.close()
-		self.reducepool.close()
+		self.mappool.terminate()
+		self.reducepool.terminate()
 	
 	def __call__(self, inputs, chunksize=10, pipe=False, length = None):
 		"""Process the inputs through the map and reduce functions given.
@@ -278,7 +278,7 @@ class ParMap(MapReduce):
 
 	def stop(self):
 		self.request_stop = True
-		self.mappool.close()
+		self.mappool.terminate()
 
 	def __call__(self, inputs, chunksize=10, length = None):
 		"""Process the inputs through the map and reduce functions given.
