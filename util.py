@@ -37,12 +37,16 @@ def parse_trip(linestr):
 		A list of tuples (userid, cellpath) containing the user id and a list of visited cell on the trip"""
 
 	try:
-		data = re.match(r"([0-9]+),([01]),([0-9.]+),([0-9.]+),([0-9 ]+)",linestr).groups()
+		data = re.match(r"([0-9]+),([01]),([0-9.]+),([0-9.]+),([0-9 ]*)",linestr).groups()
 		userid, commute_direction, orig_TAZ, dest_TAZ, cellpathstr = data
-		cellpath = [int(cell) for cell in cellpathstr.strip(" ").split(" ")]
-		return (userid, cellpath)
+		try:
+			cellpath = [int(cell) for cell in cellpathstr.strip(" ").split(" ")]
+			return (userid, cellpath)
+		except Exception, e:
+			print("Line '" + linestr + "' could will be ignored, because '" + cellpathstr + "' is not a valid cellpath")
+			return None
 	except Exception, e:
-		print("Line '" + linestr + "' could not be parsed and will be ignored, because " + unicode(e))
+		print("Line '" + linestr + "' has an invalid syntax and will be ignored.")
 		return None
 
 def confirm(prompt_str, allow_empty=False, default=False):
