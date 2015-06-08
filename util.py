@@ -181,37 +181,55 @@ class MapReduce(object):
 		self.reducepool = multiprocessing.Pool(num_workers)
 		self.request_stop = False
 		self.num_workers = num_workers
+		self.enqueued = 0
 
 	def stop(self):
 		self.request_stop = True
 		self.mappool.terminate()
 		self.reducepool.terminate()
+
+	def xinputs(self, inputs):
+		for value in inputs:
+			while self.enqueued - self.tasks_finished > 1000*self.chunksize:
+				time.sleep(1)
+			self.enqueued += 1
+			yield value
 	
-	def __call__(self, inputs, chunksize=10, pipe=False, length = None):
-		"""Process the inputs through the map and reduce functions given.
+	def __call__(self, inputs, chunksize=10, pipe=False, length = None, out = True):
+		"""Process the inputs through the map and reduce functions given. Don't call one MapReducer from different threads,
+		as it is not thread-safe.
 		
-		inputs
+		inputs:
 		  An iterable containing the input data to be processed.
-		
-		chunksize=1
+		chunksize:
 		  The portion of the input data to hand to each worker.  This
 		  can be used to tune performance during the mapping phase.
-
-		pipe = False
+		pipe:
 		  When set to true, key/value pairs are passed from map directly to reduce function just once. 
 		  Only applicable, when all values for every key are generated at once (no partioning or 
 		  reducing of the result of reduce)
+		length:
+			The length of the input iterable for the status indicator. If None, len(inputs) is used.
+		out:
+			The result is returned as output by default. If out=True, an empty list is returned (if the result is irrelevant and 
+			only the side effects of the map/reduce functions are desired). 
+
+		Returns:
+			A list containing the resulting tuples (key, value).
 		"""
+
+		self.chunksize = chunksize
+		self.enqueued = 0
+		self.tasks_finished = 0
 
 		if length == None:
 			length = len(inputs)
 
 		#map
 		start = time.time()
-		tasks_finished = 0
 		result = []
 		mapped = []
-		for response in self.mappool.imap_unordered(self.map_func, inputs, chunksize=chunksize):
+		for response in self.mappool.imap_unordered(self.map_func, self.xinputs(inputs), chunksize=chunksize):
 			if pipe:
 				mapped.extend(response)
 			else:
@@ -219,7 +237,9 @@ class MapReduce(object):
 			if self.request_stop:
 				return
 
-			if tasks_finished % (chunksize*self.num_workers) == 0:
+			self.tasks_finished += 1
+
+			if self.tasks_finished % (chunksize*self.num_workers) == 0:
 				#partition
 				partitioned_data = []
 				if pipe:
@@ -229,14 +249,17 @@ class MapReduce(object):
 				#reduce
 				reduced = self.reducepool.map(self.reduce_func, partitioned_data)
 				if pipe:
-					result.extend(reduced)
 					mapped = []
-				else:
-					result = reduced
 
-			tasks_finished += 1
-			est = datetime.datetime.now() + datetime.timedelta(seconds = (time.time()-start)/tasks_finished*(length-tasks_finished))
-			sys.stderr.write('\rdone {0:%}'.format(float(tasks_finished)/length) + "  ETA " + est.strftime("%Y-%m-%d %H:%M"))
+				if out:
+					if pipe:
+						result.extend(reduced)
+						mapped = []
+					else:
+						result = reduced
+
+				est = datetime.datetime.now() + datetime.timedelta(seconds = (time.time()-start)/self.tasks_finished*(length-self.tasks_finished))
+				sys.stderr.write('\rdone {0:%}'.format(float(self.tasks_finished)/length) + "  ETA " + est.strftime("%Y-%m-%d %H:%M"))
 
 		#partition
 		partitioned_data = []
@@ -246,13 +269,18 @@ class MapReduce(object):
 			partitioned_data = partition(result)
 
 		#reduce
-		reduced = map(self.reduce_func, partitioned_data)
+		reduced = self.reducepool.map(self.reduce_func, partitioned_data)
 		if pipe:
-			result.extend(reduced)
-		else:
-			result = reduced
 			mapped = []
 
+		if out:
+			if pipe:
+				result.extend(reduced)
+				mapped = []
+			else:
+				result = reduced
+
+		sys.stderr.write('\rdone 100%')
 		print("")
 		return result
 
@@ -277,6 +305,7 @@ class ParMap(MapReduce):
 		self.mappool = multiprocessing.Pool(num_workers)
 		self.request_stop = False
 		self.num_workers = num_workers
+		self.enqueued = 0
 
 	def stop(self):
 		self.request_stop = True
@@ -293,21 +322,25 @@ class ParMap(MapReduce):
 		  can be used to tune performance during the mapping phase.
 		"""
 
+		self.chunksize = chunksize
+		self.enqueued = 0
+		self.tasks_finished = 0
+
 		if length == None:
 			length = len(inputs)
 
 		#map
-		tasks_finished = 0
+		self.tasks_finished = 0
 		start = time.time()
 		result = []
-		for response in self.mappool.imap_unordered(self.map_func, inputs, chunksize=chunksize):
+		for response in self.mappool.imap_unordered(self.map_func, self.xinputs(inputs), chunksize=chunksize):
 			result.append(response)
 			if self.request_stop:
 				return
 
-			tasks_finished += 1
-			est = datetime.datetime.now() + datetime.timedelta(seconds = (time.time()-start)/tasks_finished*(length-tasks_finished))
-			sys.stderr.write('\rdone {0:%}'.format(float(tasks_finished)/length) + "  ETA " + est.strftime("%Y-%m-%d %H:%M"))
+			self.tasks_finished += 1
+			est = datetime.datetime.now() + datetime.timedelta(seconds = (time.time()-start)/self.tasks_finished*(length-self.tasks_finished))
+			sys.stderr.write('\rdone {0:%}'.format(float(self.tasks_finished)/length) + "  ETA " + est.strftime("%Y-%m-%d %H:%M"))
 
 		print("")
 		return result
