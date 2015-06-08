@@ -18,3 +18,13 @@ FROM boundary_edges AS e,
 WHERE r.id = e.edge_id
       /* Prevent duplicates */
       AND NOT EXISTS (SELECT id FROM hh_2po_4pgr_lite WHERE id = e.edge_id);
+
+--Debug view to view the simplified network in GIS
+DROP VIEW IF EXISTS simple_roads;
+
+CREATE OR REPLACE VIEW simple_roads AS 
+ SELECT hh_2po_4pgr.id,
+    hh_2po_4pgr.geom_way AS geom
+   FROM hh_2po_4pgr,
+    hh_2po_4pgr_lite
+  WHERE hh_2po_4pgr.id = hh_2po_4pgr_lite.id;
