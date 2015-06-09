@@ -280,7 +280,7 @@ class MapReduce(object):
 			else:
 				result = reduced
 
-		sys.stderr.write('\rdone 100%')
+		sys.stderr.write('\rdone 100%                                  ')
 		print("")
 		return result
 
