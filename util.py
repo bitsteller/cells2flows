@@ -51,6 +51,16 @@ def parse_trip(linestr):
 		print("Line '" + linestr + "' has an invalid syntax and will be ignored.")
 		return None
 
+def to_pglinestring(points):
+	"""Converts a list of (lat,lon) points to a postgis LINESTRING
+	Args:
+		points: A list of tuples (lat,lon) describing the points of the LINESTRING
+	Returns:
+		A postgis LINESTRING following the given points
+	"""
+
+	return "LINESTRING (" + ",".join([str(lat) + " " + str(lon) for lon, lat in points]) + ")"
+
 def confirm(prompt_str, allow_empty=False, default=False):
 	"""Prompts the user to confirm an action and returns the users decision.
 	Args:
