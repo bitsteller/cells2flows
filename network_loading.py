@@ -74,6 +74,8 @@ if __name__ == '__main__':
 		for od in util.od_chunks():
 			args.append((hour, od))
 		linkflows = mapper(args)
-		print("Uploading to database...")
 
-	#calculate_od((1,5,timedist)) #test
+		print("Uploading to database...")
+		f = StringIO.StringIO("\n".join(["%i\t%f\n%i\n" % (linkid, flow, hour) for linkid, flow in linkflows]))
+		cur.copy_from(f, 'network_loading', columns=('id', 'flow', 'hour'))
+		conn.commit()
