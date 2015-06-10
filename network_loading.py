@@ -1,4 +1,4 @@
-import time, signal, json, random, itertools, math, sys
+import time, signal, json, random, itertools, math, sys, StringIO
 from multiprocessing import Pool, Manager
 import urllib2 #for OSRM queries
 import psycopg2 #for postgres DB access
@@ -21,7 +21,7 @@ def calculate_flows(args):
 	result = []
 	flows_sql = "SELECT cellpath_dist.share * dyn_od.trip_weight AS flow, \
 						(route_with_waypoints(array_append(array_prepend(best_startpoint(cellpath_dist.cellpath), get_waypoints(cellpath_dist.cellpath)),best_endpoint(cellpath_dist.cellpath)))).edges AS links \
-				 FROM cellpath_dist, od AS dyn_od \
+				 FROM cellpath_dist, dyn_od_timedist AS dyn_od \
 				 WHERE cellpath_dist.start_antenna = dyn_od.start_antenna \
 				 AND cellpath_dist.end_antenna = dyn_od.end_antenna \
 				 AND dyn_od.time_interval = %s \
@@ -64,14 +64,14 @@ if __name__ == '__main__':
 	conn.commit()
 
 	#calculate link flows
-	mapper = util.MapReduce(calculate_flows, add_flows, num_workers = 4) #add flows 
+	mapper = util.MapReduce(calculate_flows, add_flows, num_workers = 20) #add flows 
 	for hour in range(0,24):
 		if request_stop:
 			break
 
 		print("Calculating link flows for interval " + str(hour) + "...")
 		args = []
-		for od in util.od_chunks():
+		for od in util.od_chunks(chunksize = 50):
 			args.append((hour, od))
 		linkflows = mapper(args)
 
