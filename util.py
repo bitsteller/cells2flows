@@ -39,8 +39,8 @@ def parse_trip(linestr):
 	try:
 		data = re.match(r"([0-9]+),([01]),([0-9.]+),([0-9.]+),([0-9 ]*)",linestr).groups()
 		userid, commute_direction, orig_TAZ, dest_TAZ, cellpathstr = data
-		if len(cellpathstr) == 0:
-			return None #ignore trips with empty cellpaths
+		if int(commute_direction) == 1 or len(cellpathstr) == 0:
+			return None #ignore trips for afternoon commute or with empty cellpaths
 		try:
 			cellpath = [int(cell) for cell in cellpathstr.strip(" ").split(" ")]
 			return (userid, cellpath)
