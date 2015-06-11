@@ -24,7 +24,7 @@ WITH targets AS (
 )
 
 INSERT INTO hh_2po_4pgr_lite
-SELECT r.id, r.source, r.target, r.cost
+SELECT r.id, r.source, r.target, r.cost, r.geom_way
 FROM visited_edges AS e,
      hh_2po_4pgr AS r
 WHERE r.id = e.id
