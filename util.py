@@ -51,6 +51,17 @@ def parse_trip(linestr):
 		print("Line '" + linestr + "' has an invalid syntax and will be ignored.")
 		return None
 
+def parse_taz(feature):
+	"""Parses a geojson feature dict
+	Args:
+		feature: geojson feature dict
+	Returns:
+		A tuple (taz_id, pglinestr), where a pglinestr is a postgis linestring describing the TAZ polygon
+	"""
+	taz_id = int(feature["properties"]["TAZ_ID"])
+	linestr = to_pglinestring([(lat, lon) for lon, lat in feature["geometry"]["coordinates"][0]])
+	return (taz_id, linestr)
+
 def to_pglinestring(points):
 	"""Converts a list of (lat,lon) points to a postgis LINESTRING
 	Args:

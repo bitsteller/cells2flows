@@ -11,6 +11,7 @@ steps = [
 			("Loading antenna data", "load_antennas.py"),
 			("Calculating simplified network", "simplify_network.py"),
 			("Loading trip data", "load_trips.py"),
+			("Loading TAZ and OD data", "load_od.py"),
 			#("Extracting trips", "extract_trips.py"),
 			#("Calculating OD matrix", "od.py"),
 			#("Calculating waypoints", "waypoints.py"),
