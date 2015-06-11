@@ -23,6 +23,21 @@ WITH (
   OIDS=FALSE
 );
 
+COMMENT ON TABLE public.ant_pos IS 
+'Antenna/celltower positions';
+
+COMMENT ON COLUMN public.ant_pos.id IS 
+'Unique identifier of the antenna. Minimum value is 0. The IDs have to match with the IDs used in trip cellpaths.';
+
+COMMENT ON COLUMN public.ant_pos.lon IS 
+'longitude of the antenna location';
+
+COMMENT ON COLUMN public.ant_pos.lat IS 
+'latitude of the antenna location';
+
+COMMENT ON COLUMN public.od.geom IS 
+'point geometry of the antenna location in WGS 84/Google projection (SRID 4326)';
+
 CREATE INDEX sidx_ant_pos_geom
   ON public.ant_pos
   USING gist

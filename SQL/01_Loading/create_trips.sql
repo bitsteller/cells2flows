@@ -28,6 +28,33 @@ WITH (
   OIDS=FALSE
 );
 
+COMMENT ON TABLE public.trips IS 
+'Contains the trips with their respective cellpath used for route estimation';
+
+COMMENT ON COLUMN public.trips.id IS 
+'a unique identifier of the trip';
+
+COMMENT ON COLUMN public.trips.user_id IS 
+'the user id of the user that the trip belongs to';
+
+COMMENT ON COLUMN public.trips.start_antenna IS 
+'The antenna id that the trip started from. Matches with the first cell id in the cellpath.';
+
+COMMENT ON COLUMN public.trips.end_antenna IS 
+'The antenna id that the trip ended in. Matches with the last cell id in the cellpath.';
+
+COMMENT ON COLUMN public.trips.start_time IS 
+'the anticipated time the trip started at';
+
+COMMENT ON COLUMN public.trips.end_time IS 
+'the anticipated time the trip ended at';
+
+COMMENT ON COLUMN public.trips.distance IS 
+'the total distance of the trip based on the straight line distance between all consecutive antennas in the cellpath';
+
+COMMENT ON COLUMN public.trips.cellpath IS 
+'an array of cell ids visited along the trip, in their order of occurance during the travel';
+
 CREATE INDEX idx_trips_start_antenna
   ON public.trips
   USING btree
