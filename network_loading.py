@@ -76,6 +76,6 @@ if __name__ == '__main__':
 		linkflows = mapper(args)
 
 		print("Uploading to database...")
-		f = StringIO.StringIO("\n".join(["%i\t%f\n%i\n" % (linkid, flow, hour) for linkid, flow in linkflows]))
+		f = StringIO.StringIO("\n".join(["%i\t%f\t%i" % (linkid, flow, hour) for linkid, flow in linkflows]))
 		cur.copy_from(f, 'network_loading', columns=('id', 'flow', 'hour'))
 		conn.commit()
