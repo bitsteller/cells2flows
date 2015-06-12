@@ -20,7 +20,7 @@ def calculate_flows(args):
 	#fetch all OD flows from origin
 	result = []
 	flows_sql = "SELECT cellpath_dist.share * dyn_od.trip_weight AS flow, \
-						(route_with_waypoints(array_append(array_prepend(best_startpoint(cellpath_dist.cellpath), get_waypoints(cellpath_dist.cellpath)),best_endpoint(cellpath_dist.cellpath)))).edges AS links \
+						(route_with_waypoints(array_append(array_prepend(best_startpoint(cellpath_dist.cellpath), get_waypoints(cellpath_dist.cellpath)), best_endpoint(cellpath_dist.cellpath)))).edges AS links \
 				 FROM cellpath_dist, dyn_od_timedist AS dyn_od \
 				 WHERE cellpath_dist.start_antenna = dyn_od.start_antenna \
 				 AND cellpath_dist.end_antenna = dyn_od.end_antenna \
@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
 		print("Calculating link flows for interval " + str(hour) + "...")
 		args = []
-		for od in util.od_chunks(chunksize = 50):
+		for od in util.od_chunks(chunksize = 10):
 			args.append((hour, od))
 		linkflows = mapper(args)
 
