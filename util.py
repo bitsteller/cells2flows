@@ -1,4 +1,5 @@
 import collections, sys, itertools, multiprocessing, re, datetime, time
+from exceptions import KeyboardInterrupt
 import psycopg2
 
 import config
@@ -256,7 +257,7 @@ class MapReduce(object):
 			else:
 				result.extend(response)
 			if self.request_stop:
-				return
+				raise KeyboardInterrupt("Abort requested")
 
 			self.tasks_finished += 1
 
@@ -357,7 +358,7 @@ class ParMap(MapReduce):
 		for response in self.mappool.imap_unordered(self.map_func, self.xinputs(inputs), chunksize=chunksize):
 			result.append(response)
 			if self.request_stop:
-				return
+				raise KeyboardInterrupt("Abort requested")
 
 			self.tasks_finished += 1
 			est = datetime.datetime.now() + datetime.timedelta(seconds = (time.time()-start)/self.tasks_finished*(length-self.tasks_finished))
