@@ -35,7 +35,7 @@ COMMENT ON COLUMN public.ant_pos.lon IS
 COMMENT ON COLUMN public.ant_pos.lat IS 
 'latitude of the antenna location';
 
-COMMENT ON COLUMN public.od.geom IS 
+COMMENT ON COLUMN public.ant_pos.geom IS 
 'point geometry of the antenna location in WGS 84/Google projection (SRID 4326)';
 
 CREATE INDEX sidx_ant_pos_geom
