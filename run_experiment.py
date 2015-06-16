@@ -11,6 +11,7 @@ steps = [
 			("Loading antenna data", "load_antennas.py"),
 			("Loading trip data", "load_trips.py"),
 			("Loading TAZ and OD data", "load_od.py"),
+			("Backup original data before preprocessing", "backup_original.py"),
 			("Cluster antennas and preprocess trips", "cluster_antennas.py"), #comment out, if you want to keep original antennas
 			("Calculating the Voronoi diagram", "voronoi.py"),
 			("Calculating simplified network", "simplify_network.py"),

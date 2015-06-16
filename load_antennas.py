@@ -77,8 +77,3 @@ if __name__ == '__main__':
 	mapper = util.MapReduce(antenna_position, upload_antenna, num_workers = 4) #add flows 
 	antennas = mapper(enumerate(open(config.ANTENNA_FILE, 'r').readlines()), length = linecount, pipe = True)
 	conn.commit()
-
-	#create backup copy ant_pos_full that keeps all antennas even when ant_pos is clustered
-	print("Creating backup table ant_pos_original (takes a while)...")
-	cur.execute("CREATE TABLE ant_pos_original AS SELECT * FROM ant_pos;")
-	conn.commit()

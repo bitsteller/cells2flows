@@ -73,8 +73,3 @@ if __name__ == '__main__':
 	mapper = util.MapReduce(read_trip, upload_trip, num_workers = 4)
 	trips = mapper(enumerate(open(config.TRIPS_FILE, 'r').xreadlines()), length = linecount, pipe = True, chunksize = 1000, out = False)
 	conn.commit()
-
-	#create backup copy ant_pos_full that keeps all antennas even when ant_pos is clustered
-	print("Creating backup table trips_orignal (takes a while)...")
-	cur.execute("CREATE TABLE trips_original AS SELECT * FROM trips;")
-	conn.commit()
