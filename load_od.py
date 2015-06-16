@@ -64,5 +64,5 @@ if __name__ == '__main__':
 	f = StringIO.StringIO("\n".join(rows))
 
 	print("Upload OD data to database (takes a while)...")
-	cur.copy_from(f, 'od', columns=('origin_taz', 'destination_taz', 'flow'))
+	cur.copy_from(f, 'taz_od', columns=('origin_taz', 'destination_taz', 'flow'))
 	conn.commit()
