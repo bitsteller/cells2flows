@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
 
 	print("Creating OD table...")
-	cur.execute(open("SQL/01_Loading/create_od.sql", 'r').read())
+	cur.execute(open("SQL/01_Loading/create_taz_od.sql", 'r').read())
 	conn.commit()
 
 	print("Loading OD data...")
