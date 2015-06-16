@@ -51,6 +51,12 @@ if __name__ == '__main__':
 	tazs = []
 	mapper = None
 
+	#create backup copy taz_original before joining TAZs
+	print("Creating backup table taz_original (takes a while)...")
+	cur.execute("CREATE TABLE taz_original AS SELECT * FROM taz;")
+	conn.commit()
+
+
 	print("Creating OD table...")
 	cur.execute(open("SQL/01_Loading/create_od.sql", 'r').read())
 	conn.commit()
@@ -66,3 +72,7 @@ if __name__ == '__main__':
 	cur.copy_from(f, 'od', columns=('origin_taz', 'destination_taz', 'flow'))
 	conn.commit()
 
+	#create backup copy od_original before joining TAZs
+	print("Creating backup table od_original (takes a while)...")
+	cur.execute("CREATE TABLE od_original AS SELECT * FROM od;")
+	conn.commit()
