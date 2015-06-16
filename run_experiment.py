@@ -9,9 +9,11 @@ preparations = [ "install and init a postgres database",
 			  ]
 steps = [
 			("Loading antenna data", "load_antennas.py"),
-			("Calculating simplified network", "simplify_network.py"),
 			("Loading trip data", "load_trips.py"),
 			("Loading TAZ and OD data", "load_od.py"),
+			("Cluster antennas and preprocess trips", "cluster_antennas.py"), #comment out, if you want to keep original antennas
+			("Calculating the Voronoi diagram", "voronoi.py"),
+			("Calculating simplified network", "simplify_network.py"),
 			#("Extracting trips", "extract_trips.py"),
 			#("Calculating OD matrix", "od.py"),
 			#("Calculating waypoints", "waypoints.py"),
