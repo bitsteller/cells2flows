@@ -119,7 +119,7 @@ def od_chunks(chunksize = 200):
 	Returns:
 		A generator that returns tuples of the form ([list of origins], [list of destinations])"""
 
-	for origin in config.CELLS:
+	for origin in cells:
 		for destinations in chunks(config.CELLS, chunksize):
 			yield ([origin], destinations)
 
@@ -366,3 +366,19 @@ class ParMap(MapReduce):
 
 		print("")
 		return result
+
+
+
+#make sure config.CELLS exsits
+if not hasattr(config, "CELLS"):
+	try:
+		db_login()
+		conn = db_connect()
+		cur = conn.cursor()
+		cur.execute("SELECT MIN(id) AS min, MAX(id) AS max FROM ant_pos")
+		mincell, maxcell = cur.fetchone()
+		conn.commit()
+		config.CELLS = range(mincell, maxcell+1)
+	except Exception, e:
+		pass
+
