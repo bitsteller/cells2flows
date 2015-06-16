@@ -1,3 +1,6 @@
+#DEPRECATED: This script is deprecated as OD calculation is no longer part of cells2flows, will become a seperate project
+
+
 import time, signal, json, random, itertools, math, sys
 from multiprocessing import Pool, Manager
 import psycopg2 #for postgres DB access
