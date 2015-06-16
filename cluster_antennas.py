@@ -72,6 +72,18 @@ if __name__ == '__main__':
 	conn = util.db_connect()
 	cur = conn.cursor()
 
+	print("Restoring original data from ant_pos_original (takes a while)...")
+	cur.execute(open("SQL/01_Loading/create_ant_pos.sql", 'r').read())
+	conn.commit()
+	cur.execute("INSERT INTO ant_pos SELECT * FROM ant_pos_original;")
+	conn.commit()
+
+	print("Restoring original data from trips_original (takes a while)...")
+	cur.execute(open("SQL/01_Loading/create_trips.sql", 'r').read())
+	conn.commit()
+	cur.execute("INSERT INTO trips SELECT * FROM trips_original;")
+	conn.commit()
+
 	print("Creating array_replace function...")
 	cur.execute(open("SQL/01a_Preprocessing/create_array_replace_func.sql", 'r').read())
 	conn.commit()
