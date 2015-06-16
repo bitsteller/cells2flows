@@ -95,5 +95,3 @@ if __name__ == '__main__':
 	print("Updateing antenna and trip tables...")
 	mapper = util.ParMap(join_cells, num_workers = 1) #not parallizable due to necessary write access to cellpath arrays, ParMap just for status indicator
 	mapper(components, chunksize = 5)
-
-
