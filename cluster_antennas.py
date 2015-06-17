@@ -45,6 +45,7 @@ def join_cells(args):
 				 		ST_Y(ST_Centroid(clustered_antennas.geom)) AS lat, \
 				 		ST_Centroid(clustered_antennas.geom) AS geom \
 				 FROM clustered_antennas", {"cluster": tuple(cellids), "id": newid})
+	conn.commit()
 
 def update_trip(tripid):
 	conn = util.db_connect()
