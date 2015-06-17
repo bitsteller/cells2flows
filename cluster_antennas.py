@@ -26,20 +26,18 @@ def connected_components(graph):
 			components.append(dfs(node))
 	return components 
 
-def join_cells(cellids):
-	"""Joins to antennas to one new antenna placed at the centroid of the original antennas. Also updates the cellpaths in all trips accordingly.
+def join_cells(args):
+	"""Joins all given antennas to one new antenna placed at the centroid of the original antennas.
 	Args:
-		cellids: A list cellids to join
+		args: A tuple (newid, cellids) where newid is the new cellid of 
+			  the clustered antenna and cellids a list of antenna ids from ant_pos_original to be clustered
 	"""
-	if len(cellids) < 2:
-		return #single antenna in cluster, no join necessary
+	newid, cellids = args
 
 	conn = util.db_connect()
 	cur = conn.cursor()
 
 	#add new cell at centroid of the cluster
-	cur.execute("SELECT MAX(id) FROM ant_pos")
-	newid = cur.fetchone()[0] + 1
 	cur.execute("WITH clustered_antennas AS (SELECT ST_Union(ant_pos.geom) AS geom FROM ant_pos WHERE ant_pos.id IN %(cluster)s) \
 				 INSERT INTO ant_pos (id, lon, lat, geom) \
 				 SELECT %(id)s AS id, \
@@ -48,12 +46,23 @@ def join_cells(cellids):
 				 		ST_Centroid(clustered_antennas.geom) AS geom \
 				 FROM clustered_antennas", {"cluster": tuple(cellids), "id": newid})
 
-	#replace old cell ids in cellpaths in trip table
-	data = [{"oldcell": oldcell, "newcell": newid} for oldcell in cellids]
-	cur.executemany(open("SQL/01a_Preprocessing/replace_antenna_in_trips.sql", 'r').read(), data)
+def update_trip(tripid):
+	conn = util.db_connect()
+	cur = conn.cursor()
 
-	#remove old cells
-	cur.execute("DELETE FROM ant_pos WHERE id IN %s", (tuple(cellids),))
+	#fetch cellpath
+	cur.execute("SELECT cellpath FROM trips_original WHERE id = %s", (tripid,))
+	oldcellpath = cur.fetchone()[0]
+
+	#update antenna ids
+	newcellpath = [newcells[oldcell] for oldcell in oldcellpath]
+
+	#remove duplicates #TODO!
+
+	#copy old trip and update cellpath
+	cur.execute("INSERT INTO trips SELECT * FROM trips_original WHERE id = %s", (tripid,))
+	data = (newcellpath[0], newcellpath[-1], newcellpath, tripid)
+	cur.execute("UPDATE trips SET (start_antenna, end_antenna, cellpath) = (%s, %s, %s) WHERE id = %s", data)
 	conn.commit()
 
 def signal_handler(signal, frame):
@@ -72,16 +81,12 @@ if __name__ == '__main__':
 	conn = util.db_connect()
 	cur = conn.cursor()
 
-	print("Restoring original data from ant_pos_original (takes a while)...")
+	print("Recreating ant_pos table...")
 	cur.execute(open("SQL/01_Loading/create_ant_pos.sql", 'r').read())
 	conn.commit()
-	cur.execute("INSERT INTO ant_pos SELECT * FROM ant_pos_original;")
-	conn.commit()
 
-	print("Restoring original data from trips_original (takes a while)...")
+	print("Recreating trips table...")
 	cur.execute(open("SQL/01_Loading/create_trips.sql", 'r').read())
-	conn.commit()
-	cur.execute("INSERT INTO trips SELECT * FROM trips_original;")
 	conn.commit()
 
 	print("Creating array_replace function...")
@@ -92,11 +97,11 @@ if __name__ == '__main__':
 	sql = '''
 	SELECT w.id,
 	ARRAY(SELECT id
-		FROM ant_pos
+		FROM ant_pos_original
 		WHERE ST_DWithin(ST_Transform(geom, 3857), ST_Transform(w.geom, 3857), %(min_dist)s) AND 
 		id != w.id
 		)
-	FROM ant_pos AS w;
+	FROM ant_pos_original AS w;
 	'''
 	cur.execute(sql, {'min_dist': config.MIN_ANTENNA_DIST})
 	graph = {node: edges for node, edges in cur}
@@ -104,6 +109,15 @@ if __name__ == '__main__':
 	print("Clustering...")
 	components = connected_components(graph)
 
-	print("Updateing antenna and trip tables...")
+	newcells = dict()
+	for newid, oldscells in enumerate(components):
+		for oldid in oldscells:
+			newcells[oldid] = newid
+
+	print("Updateing antennas...")
 	mapper = util.ParMap(join_cells, num_workers = 1) #not parallizable due to necessary write access to cellpath arrays, ParMap just for status indicator
-	mapper(components, chunksize = 5)
+	mapper(enumerate(components), chunksize = 5, length = len(components))
+
+	print("Updateting trips...")
+	mapper = util.ParMap(update_trip) #not parallizable due to necessary write access to cellpath arrays, ParMap just for status indicator
+	mapper(config.TRIPS, chunksize = 1000)
