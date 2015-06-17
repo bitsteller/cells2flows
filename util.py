@@ -361,8 +361,9 @@ class ParMap(MapReduce):
 				raise KeyboardInterrupt("Abort requested")
 
 			self.tasks_finished += 1
-			est = datetime.datetime.now() + datetime.timedelta(seconds = (time.time()-start)/self.tasks_finished*(length-self.tasks_finished))
-			sys.stderr.write('\rdone {0:%}'.format(float(self.tasks_finished)/length) + "  ETA " + est.strftime("%Y-%m-%d %H:%M"))
+			if self.tasks_finished % (chunksize) == 0:
+				est = datetime.datetime.now() + datetime.timedelta(seconds = (time.time()-start)/self.tasks_finished*(length-self.tasks_finished))
+				sys.stderr.write('\rdone {0:%}'.format(float(self.tasks_finished)/length) + "  ETA " + est.strftime("%Y-%m-%d %H:%M"))
 
 		print("")
 		return result
