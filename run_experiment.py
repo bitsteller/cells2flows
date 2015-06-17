@@ -40,7 +40,7 @@ for i, (action, script) in enumerate(steps[start_step:]):
 		print("\033[91m" + action + " exited with errors.\033[0m The rest of the pipeline cannot be executed before this step finished successfully.")
 		start_step = start_step + i
 		if start_step > 1:
-			print("You can start the procedure from step " + str(start_step) + " next time in order to skip the previous steps that finished successfully.")
+			print("You can start the procedure from step " + str(start_step + 1) + " next time in order to skip the previous steps that finished successfully.")
 		sys.exit()
 
 print("Done. Find your experiment results in the database.")
