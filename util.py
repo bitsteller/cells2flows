@@ -378,7 +378,21 @@ if not hasattr(config, "CELLS"):
 		cur.execute("SELECT MIN(id) AS min, MAX(id) AS max FROM ant_pos")
 		mincell, maxcell = cur.fetchone()
 		conn.commit()
-		config.CELLS = range(mincell, maxcell+1)
+		config.CELLS = xrange(mincell, maxcell+1)
+	except Exception, e:
+		pass
+
+
+#make sure config.TRIPS exsits
+if not hasattr(config, "TRIPS"):
+	try:
+		db_login()
+		conn = db_connect()
+		cur = conn.cursor()
+		cur.execute("SELECT MIN(id) AS min, MAX(id) AS max FROM trips_original")
+		mintrip, maxtrip = cur.fetchone()
+		conn.commit()
+		config.TRIPS = xrange(mintrip, maxtrip+1)
 	except Exception, e:
 		pass
 
