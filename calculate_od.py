@@ -19,14 +19,7 @@ if __name__ == '__main__':
 	cur = conn.cursor()
 
 	print("Restoring original data from taz_original (takes a while)...")
-	cur.execute(open("SQL/01_Loading/create_taz.sql", 'r').read())
+	cur.execute(open("SQL/01a_preprocessing/create_od.sql", 'r').read())
 	conn.commit()
 	cur.execute("INSERT INTO taz SELECT * FROM taz_original;")
 	conn.commit()
-
-	print("Restoring original data from od_original (takes a while)...")
-	cur.execute(open("SQL/01_Loading/create_od.sql", 'r').read())
-	conn.commit()
-	cur.execute("INSERT INTO od SELECT * FROM od_original;")
-	conn.commit()
-
