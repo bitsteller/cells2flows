@@ -38,7 +38,7 @@ def join_cells(args):
 	cur = conn.cursor()
 
 	#add new cell at centroid of the cluster
-	cur.execute("WITH clustered_antennas AS (SELECT ST_Union(ant_pos.geom) AS geom FROM ant_pos WHERE ant_pos.id IN %(cluster)s) \
+	cur.execute("WITH clustered_antennas AS (SELECT ST_Union(ant_pos_original.geom) AS geom FROM ant_pos_original WHERE ant_pos_original.id IN %(cluster)s) \
 				 INSERT INTO ant_pos (id, lon, lat, geom) \
 				 SELECT %(id)s AS id, \
 				 		ST_X(ST_Centroid(clustered_antennas.geom)) AS lon, \
@@ -89,10 +89,6 @@ if __name__ == '__main__':
 	cur.execute(open("SQL/01_Loading/create_trips.sql", 'r').read())
 	conn.commit()
 
-	print("Creating array_replace function...")
-	cur.execute(open("SQL/01a_Preprocessing/create_array_replace_func.sql", 'r').read())
-	conn.commit()
-
 	print("Fetching antennas to join by distance from database...") #All antennas closer than config.MIN_ANTENNA_DIST will be merged
 	sql = '''
 	SELECT w.id,
@@ -114,7 +110,7 @@ if __name__ == '__main__':
 		for oldid in oldscells:
 			newcells[oldid] = newid
 
-	print("Updateing antennas...")
+	print("Updateting antennas...")
 	mapper = util.ParMap(join_cells, num_workers = 1) #not parallizable due to necessary write access to cellpath arrays, ParMap just for status indicator
 	mapper(enumerate(components), chunksize = 5, length = len(components))
 
