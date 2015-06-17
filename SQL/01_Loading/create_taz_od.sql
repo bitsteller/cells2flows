@@ -1,6 +1,6 @@
 --Drop exisiting od related objects
 DROP INDEX IF EXISTS idx_taz_od_interval;
-DROP TABLE IF EXISTS public.od CASCADE;
+DROP TABLE IF EXISTS public.taz_od CASCADE;
 
 --Create od table and index
 CREATE TABLE public.taz_od
