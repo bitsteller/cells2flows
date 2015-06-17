@@ -11,10 +11,10 @@ steps = [
 			("Loading antenna data", "load_antennas.py"),
 			("Loading trip data", "load_trips.py"),
 			("Loading TAZ and OD data", "load_od.py"),
-			("Backup original antenna and trip data before clustering", "backup_original.py"),
+			("Backup original antenna and trip data", "backup_original.py"),
 			("Cluster antennas and preprocess trips", "cluster_antennas.py"), #comment out, if you want to keep original antennas
-			("Calculating the Voronoi diagram", "voronoi.py"),
-			("Calculating simplified network", "simplify_network.py"),
+			("Calculate Voronoi diagram", "voronoi.py"),
+			("Calculate simplified network", "simplify_network.py"),
 			#("Calculating OD matrix", "od.py"),
 			#("Calculating waypoints", "waypoints.py"),
 			#("Loading network", "network_loading.py")
