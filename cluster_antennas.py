@@ -55,10 +55,14 @@ def update_trip(tripid):
 	cur.execute("SELECT cellpath FROM trips_original WHERE id = %s", (tripid,))
 	oldcellpath = cur.fetchone()[0]
 
-	#update antenna ids
-	newcellpath = [newcells[oldcell] for oldcell in oldcellpath]
-
-	#remove duplicates #TODO!
+	#update antenna ids and remove duplicates (same cell appears more than one time in a row in the cellpath)
+	newcellpath = []
+	lastcell = None
+	for oldcell in oldcellpath:
+		newcell = newcells[oldcell]
+		if newcell != lastcell:
+			newcellpath.append(newcell)
+			lastcell = newcell
 
 	#copy old trip and update cellpath
 	cur.execute("INSERT INTO trips SELECT * FROM trips_original WHERE id = %s", (tripid,))
