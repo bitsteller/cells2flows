@@ -5,8 +5,8 @@ DROP TABLE IF EXISTS public.od CASCADE;
 --Create od table and index
 CREATE TABLE public.od
 (
-  orig_taz integer NOT NULL,
-  dest_taz integer NOT NULL,
+  orig_cell integer NOT NULL,
+  dest_cell integer NOT NULL,
   interval integer,
   flow double precision NOT NULL,
   CONSTRAINT od_pkey PRIMARY KEY (orig_cell, dest_cell)
