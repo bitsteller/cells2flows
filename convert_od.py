@@ -2,6 +2,21 @@ import psycopg2, signal, sys
 
 import util, config #local modules
 
+def calculate_cell_od_flow(args):
+	global interval
+	o_taz, d_taz, flow = args
+
+	#distribute flow on cells by area
+	pass
+
+def upload_cell_od_flow(args):
+	global interval
+	key, flows = args
+	o_cell, d_cell = key
+	flow = sum(flows)
+	
+
+
 def signal_handler(signal, frame):
 	global mapper, request_stop
 	if mapper:
@@ -18,8 +33,3 @@ if __name__ == '__main__':
 	conn = util.db_connect()
 	cur = conn.cursor()
 
-	print("Restoring original data from taz_original (takes a while)...")
-	cur.execute(open("SQL/01a_preprocessing/create_od.sql", 'r').read())
-	conn.commit()
-	cur.execute("INSERT INTO taz SELECT * FROM taz_original;")
-	conn.commit()

@@ -15,7 +15,7 @@ steps = [
 			("Cluster antennas and preprocess trips", "cluster_antennas.py"), #comment out, if you want to keep original antennas
 			("Calculate Voronoi diagram", "voronoi.py"),
 			("Calculate simplified network", "simplify_network.py"),
-			("Convert OD matrix to cells", "convert_od.py"),
+			("Convert OD matrix to cell matrix", "convert_od.py"),
 			#("Calculating waypoints", "waypoints.py"),
 			#("Loading network", "network_loading.py")
 		]
