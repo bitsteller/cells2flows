@@ -72,12 +72,14 @@ Install the following python libraries using pip:
 * geopy
 * keyring (optional)
 	
-# Adjust parsing functions and configuration parameters
-	
+# Adjust parsing functions 
+
+# Adjust configuration parameters
 	
 # Run the full traffic assignment procedure
 	
 When you performed all the previous steps , you can run the whole pipleline through:
+
 	python run_experiment.py
 	
 *Warning*: Be aware that when you run the process from the beginning all previously calculated data will be deleted from the database.
