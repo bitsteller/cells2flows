@@ -23,9 +23,12 @@ Special attention in the code has been paid to efficiency, parallization and mem
 ## Features
 - supports arbitrary origin/destination geometries (TAZs) for OD matrix that can be different from the cell geometries
 - performs the whole process by running a single script `run_experiment.py`
+- configurable `MIN_ANTENNA_DISTANCE` parameter allows to reduce the computation time while impacting the result reasonably
+- configurable bounding box allows to perform the computation for a certain area only
 - data is stored in postgres database, allowing easy access through GIS tools like QGIS for viewing results
 - low memory-consumption allows running on older machines
 - fast computation due to paralellization of all computation-intensive steps
+- status information / completion time estimation for all compuation intesive steps
 
 ## Setup & Usage
 
