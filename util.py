@@ -215,6 +215,8 @@ class MapReduce(object):
 			while self.enqueued - self.tasks_finished > 100*self.chunksize:
 				time.sleep(1)
 			self.enqueued += 1
+			if self.request_stop:
+				raise KeyboardInterrupt("Abort requested")
 			yield value
 	
 	def __call__(self, inputs, chunksize=10, pipe=False, length = None, out = True):
@@ -270,6 +272,8 @@ class MapReduce(object):
 					partitioned_data = partition(result)
 				#reduce
 				reduced = self.reducepool.map(self.reduce_func, partitioned_data)
+				if self.request_stop:
+					raise KeyboardInterrupt("Abort requested")
 				if pipe:
 					mapped = []
 
