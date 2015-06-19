@@ -13,16 +13,12 @@ def extract_segments():
 	conn = util.db_connect()
 	cur = conn.cursor()
 
-	print("Deleting from segment table...")
-	cur.execute("DELETE FROM cellpath_parts;")
+	print("Creating getParts() function...")
+	cur.execute(open("SQL/04_Routing_Network_Loading/create_getparts_func.sql", 'r').read())
+	conn.commit()
 
-	print("Extracting segments from trip cellpaths...")
-	sql = "	INSERT INTO cellpath_parts (part)\
-			SELECT DISTINCT parts.part AS part \
-			FROM trips_cellpath, getParts(trips_cellpath.cellpath) AS parts\
-			WHERE NOT parts.part[1] = parts.part[2] AND NOT parts.part[3] = parts.part[2]\
-      			  AND start_antenna IN %s AND end_antenna IN %s"
-	cur.execute(sql, (tuple(config.CELLS), tuple(config.CELLS)))
+	print("Creating cellpath_parts view (takes a while)...")
+	cur.execute(open("SQL/04_Routing_Network_Loading/create_cellpath_parts.sql", 'r').read(), {"cells": tuple(config.CELLS)})
 	conn.commit()
 
 def best_waypoint(segment):

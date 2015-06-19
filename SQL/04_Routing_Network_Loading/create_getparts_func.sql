@@ -1,4 +1,4 @@
-﻿--This function returns all triplets of cells in a cellpath
+--This function returns all triplets of cells in a cellpath
 CREATE OR REPLACE FUNCTION getParts(integer[]) RETURNS TABLE(part integer[]) AS
 $BODY$
     BEGIN
@@ -14,5 +14,5 @@ $BODY$
     IMMUTABLE
     RETURNS NULL ON NULL INPUT;
 
-select parts.* from trips_cellpath, getParts(trips_cellpath.cellpath) as parts
-order by id
+--select parts.* from trips_cellpath, getParts(trips_cellpath.cellpath) as parts
+--order by id
