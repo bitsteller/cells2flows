@@ -95,6 +95,10 @@ if __name__ == '__main__':
 
 	extract_segments()
 
+	print("Creating waypoints table...")
+	cur.execute(open("SQL/04_Routing_Network_Loading/create_waypoints.sql", 'r').read())
+	conn.commit()
+
 	conn = util.db_connect()
 
 	#get number of remaining segments to calculate
