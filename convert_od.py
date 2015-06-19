@@ -5,6 +5,11 @@ import util, config #local modules
 CHUNKSIZE = 100
 
 def fetch_taz_od_chunks():
+	"""Fetches chunks of rows from the taz_od table of the database
+	Returns:
+		a generator returning lists containing row tuples (origin_taz, destination_taz, flow) fetched from the database
+	"""
+
 	conn = util.db_connect()
 	cur = conn.cursor()
 	cur.execute("SELECT origin_taz, destination_taz, flow  \
@@ -21,6 +26,13 @@ def fetch_taz_od_chunks():
 	yield batch
 
 def calculate_cell_od_flow(taz_od_chunk):
+	"""Converts TAZ OD to cell OD flows, where the cell OD flow is calculated 
+	based on the share of the area that the origin and destination cells cover.
+	Args:
+		taz_od_chunk: a list of tuples (origin_taz, destination_taz, flow), where the first two are TAZ ids
+	Returns:
+		A list of tuples ((origin_cell, destination_cell), flow)
+	"""
 	global interval
 
 	conn = util.db_connect()
@@ -52,6 +64,12 @@ def calculate_cell_od_flow(taz_od_chunk):
 	return result
 
 def upload_cell_od_flow(args):
+	"""Aggregates cell OD flows and adds the flows to the database, 
+	by updateing an exisiting cell OD pair row or createing a new one if no row exisits.
+	Args:
+		args: a tuple (key, flows), where key is a tuple (o_cell, d_cell) containing the originn and desitination cell ids and
+			flows is a list of flows that occur on the given OD pair
+	"""
 	global interval
 	key, flows = args
 	o_cell, d_cell = key
