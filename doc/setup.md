@@ -61,6 +61,7 @@
 # Install python packages
 
 Install the following python libraries using pip:
+
 	pip install $name_of_the_library
 	
 * numpy
