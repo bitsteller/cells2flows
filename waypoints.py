@@ -93,17 +93,21 @@ if __name__ == '__main__':
 	#connect to db
 	util.db_login()
 
-	extract_segments()
+	#extract_segments()
+
+	conn = util.db_connect()
+	cur = conn.cursor()
 
 	print("Creating waypoints table...")
 	cur.execute(open("SQL/04_Routing_Network_Loading/create_waypoints.sql", 'r').read())
 	conn.commit()
 
-	conn = util.db_connect()
+	print("Creating closest_junction() function...")
+	cur.execute(open("SQL/04_Routing_Network_Loading/create_closest_junction_func.sql", 'r').read())
+	conn.commit()
 
 	#get number of remaining segments to calculate
 	sql_remaining = "SELECT COUNT(*) FROM cellpath_parts WHERE NOT EXISTS(SELECT * FROM waypoints WHERE waypoints.part = cellpath_parts.part)"
-	cur = conn.cursor()
 	cur.execute(sql_remaining)
 	remaining = cur.fetchone()[0]
 
