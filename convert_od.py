@@ -45,7 +45,7 @@ def calculate_cell_od_flow(taz_od_chunk):
 		tazs.append(o_taz)
 		tazs.append(d_taz)
 
-	cur.execute("SELECT taz_id, cell_id, share FROM taz_cells WHERE taz_id IN %s", (tuple(taz),))
+	cur.execute("SELECT taz_id, cell_id, share FROM taz_cells WHERE taz_id IN %s", (tuple(tazs),))
 	coverages = cur.fetchall()
 
 	for o_taz, d_taz, flow in taz_od_chunk:
