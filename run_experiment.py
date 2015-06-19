@@ -16,7 +16,7 @@ steps = [
 			("Calculate Voronoi diagram", "voronoi.py"),
 			("Calculate simplified network", "simplify_network.py"),
 			("Convert OD matrix to cell matrix", "convert_od.py"),
-			#("Calculating waypoints", "waypoints.py"),
+			("Calculating waypoints", "waypoints.py"),
 			#("Loading network", "network_loading.py")
 		]
 
