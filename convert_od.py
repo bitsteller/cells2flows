@@ -39,12 +39,19 @@ def calculate_cell_od_flow(taz_od_chunk):
 	cur = conn.cursor()
 	result = []
 
+	#fetch origin/destination cell coverages
+	tazs = []
 	for o_taz, d_taz, flow in taz_od_chunk:
-		#fetch origina/destination cell coverage
-		cur.execute("SELECT taz_id, cell_id, share FROM taz_cells WHERE taz_id = %s OR taz_id = %s", (o_taz,d_taz))
+		tazs.append(o_taz)
+		tazs.append(d_taz)
+
+	cur.execute("SELECT taz_id, cell_id, share FROM taz_cells WHERE taz_id IN %s", (tuple(taz),))
+	coverages = cur.fetchall()
+
+	for o_taz, d_taz, flow in taz_od_chunk:
 		o_cells = []
 		d_cells = []
-		for taz_id, cell_id, share in cur.fetchall():
+		for taz_id, cell_id, share in coverages:
 			if taz_id == o_taz:
 				o_cells.append((cell_id, share))
 			if taz_id == d_taz:
