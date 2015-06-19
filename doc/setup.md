@@ -80,33 +80,28 @@ Install the following python libraries using pip:
 When you performed all the previous steps , you can run the whole pipleline through:
 	python run_experiment.py
 	
-	Be aware that when you run the process from the beginning all previously calculated data will be deleted from the database.
+*Warning*: Be aware that when you run the process from the beginning all previously calculated data will be deleted from the database.
 	
 # DB Structure and Tables
 
 ## Input tables:
-* ant_pos: antenna positions
-* set: dataset with user sequences
-* hh_2po_4pgr_vertices: road network vertices
-* hh_2po_4pgr: road network links
+* hh_2po_4pgr: road network links (loaded through osm2po)
+* ant_pos: antenna positions (loaded from csv)
+* trips: dataset of user trip cellpaths (loaded from csv)
+* taz_od: OD matrix containing flows betwen TAZs (loaded from pickle file)
+* taz: Traffic analysis zone (TAZ) polygon geometries (loaded from geojson file)
 
 ## Intermediate tables:
-* trips: extracted trips (previously: trips_cellpath)
-* od: time-sliced OD matrix (previously: dyn_od_timedist)
-* border_junctions (previously: boundary_junctions)  [X]
-* cell_factors
-* cellpath_parts
-* homebase
-* workbase
-* trip_factors
-* waypoints
-* voronoi [?]
+* od: cell OD matrix containg the flows between cells (converted from taz_od)
+* hh_2po_4pgr_vertices: intersection table
+* waypoints: best waypoints for cellpath segments
+* voronoi: Voronoi polygon for each antenna
 
 ## Intermediate views:
-* border_edges  [X]
-* cell_population
+* boundary_junctions
+* cellpath_parts
+* boundary_edges
 * cellpath_dist
-* trips_with_factors
 
 ## Output tables/views:
 * network_loading
