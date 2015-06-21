@@ -64,10 +64,6 @@ if __name__ == '__main__':
 	cur.execute(open("SQL/04_Routing_Network_Loading/create_network_loading.sql", 'r').read())
 	conn.commit()
 
-	print("Creating cellpath distribution (takes a while)...")
-	cur.execute(open("SQL/04_Routing_Network_Loading/create_cellpath_dist.sql", 'r').read())
-	conn.commit()
-
 	print("Creating route functions...")
 	cur.execute(open("SQL/04_Routing_Network_Loading/create_route_functions.sql", 'r').read())
 	conn.commit()
