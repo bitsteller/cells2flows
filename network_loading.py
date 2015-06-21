@@ -56,11 +56,11 @@ if __name__ == '__main__':
 	signal.signal(signal.SIGINT, signal_handler) #abort on CTRL-C
 	#connect to db
 	util.db_login()
-
-	print("Deleting from network_loading table...")
 	conn = util.db_connect()
 	cur = conn.cursor()
-	cur.execute("DELETE FROM network_loading")
+
+	print("Creating network_loading table and loaded_links view...")
+	cur.execute(open("SQL/04_Routing_Network_Loading/create_network_loading.sql", 'r').read())
 	conn.commit()
 
 	#calculate link flows
