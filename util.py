@@ -119,7 +119,7 @@ def od_chunks(chunksize = 200):
 	Returns:
 		A generator that returns tuples of the form ([list of origins], [list of destinations])"""
 
-	for origin in cells:
+	for origin in config.CELLS:
 		for destinations in chunks(config.CELLS, chunksize):
 			yield ([origin], destinations)
 
