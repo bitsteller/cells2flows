@@ -19,12 +19,12 @@ def calculate_flows(args):
 
 	#fetch all OD flows from origin
 	result = []
-	flows_sql = "SELECT cellpath_dist.share * dyn_od.trip_weight AS flow, \
+	flows_sql = "SELECT cellpath_dist.share * od.flow AS flow, \
 						(route_with_waypoints(array_append(array_prepend(best_startpoint(cellpath_dist.cellpath), get_waypoints(cellpath_dist.cellpath)), best_endpoint(cellpath_dist.cellpath)))).edges AS links \
-				 FROM cellpath_dist, dyn_od_timedist AS dyn_od \
-				 WHERE cellpath_dist.start_antenna = dyn_od.start_antenna \
-				 AND cellpath_dist.end_antenna = dyn_od.end_antenna \
-				 AND dyn_od.time_interval = %s \
+				 FROM cellpath_dist, od\
+				 WHERE cellpath_dist.start_antenna = od.start_antenna \
+				 AND cellpath_dist.end_antenna = od.end_antenna \
+				 AND od.time_interval = %s \
 				 AND cellpath_dist.start_antenna IN %s \
 				 AND cellpath_dist.end_antenna IN %s"
 
@@ -44,10 +44,11 @@ def add_flows(item):
 
 def signal_handler(signal, frame):
 	global mapper, request_stop
+	request_stop = True
 	if mapper:
 		mapper.stop()
-	request_stop = True
 	print("Aborting (can take a minute)...")
+	sys.exit(1)
 
 request_stop = False
 mapper = None
@@ -63,8 +64,12 @@ if __name__ == '__main__':
 	cur.execute(open("SQL/04_Routing_Network_Loading/create_network_loading.sql", 'r').read())
 	conn.commit()
 
+	print("Creating cellpath distribution (takes a while)...")
+	cur.execute(open("SQL/04_Routing_Network_Loading/create_cellpath_dist.sql", 'r').read())
+	conn.commit()
+
 	#calculate link flows
-	mapper = util.MapReduce(calculate_flows, add_flows, num_workers = 20) #add flows 
+	mapper = util.MapReduce(calculate_flows, add_flows) #add flows 
 	for hour in range(0,24):
 		if request_stop:
 			break
