@@ -14,6 +14,11 @@ COMMENT ON TABLE public.network_loading IS
 'Contains the main result, the estimated flows an the transportation network links. To view the result in GIS tools,
 use the loaded_links view which adds a geom column to the table containing the link geometries.';
 
+--interval index
+CREATE INDEX idx_network_loading_interval
+  ON public.network_loading
+  USING btree
+  (interval);
 
 -- create loaded links view
 DROP VIEW IF EXISTS public.loaded_links;
