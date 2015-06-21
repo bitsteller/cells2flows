@@ -1,6 +1,6 @@
 --Drop exisiting antenna related objects
-DROP INDEX IF EXISTS idx_start_antenna;
-DROP INDEX IF EXISTS idx_end_antenna;
+DROP INDEX IF EXISTS idx_trips_start_antenna;
+DROP INDEX IF EXISTS idx_trips_end_antenna;
 DROP TABLE IF EXISTS public.trips CASCADE;
 DROP SEQUENCE IF EXISTS public.trips_id_seq;
 
