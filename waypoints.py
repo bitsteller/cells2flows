@@ -134,7 +134,8 @@ if __name__ == '__main__':
 		print("Calculating waypoints...")
 		mapper = util.ParMap(best_waypoint)
 		mapper(util.chunks(segments, 10), length = len(segments)//10)
-
+		mapper.stop()
+		mapper = None
 		if request_stop:
 			break
 
