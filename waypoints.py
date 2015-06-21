@@ -100,13 +100,13 @@ if __name__ == '__main__':
 	#connect to db
 	util.db_login()
 
-	#extract_segments()
+	extract_segments()
 
 	conn = util.db_connect()
 	cur = conn.cursor()
 
 	print("Creating waypoints table...")
-	#cur.execute(open("SQL/04_Routing_Network_Loading/create_waypoints.sql", 'r').read())
+	cur.execute(open("SQL/04_Routing_Network_Loading/create_waypoints.sql", 'r').read())
 	conn.commit()
 
 	print("Creating closest_junction() function...")
