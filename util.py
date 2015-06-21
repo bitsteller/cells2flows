@@ -1,5 +1,5 @@
 import collections, sys, itertools, multiprocessing, re, datetime, time
-from exceptions import KeyboardInterrupt
+from exceptions import KeyboardInterrupt, ValueError
 import psycopg2
 
 import config
@@ -111,7 +111,18 @@ def chunks(seq, n):
 		A generator that yields lists containing chunks of the original sequence
 	"""
 
-	return (seq[i:i+n] for i in xrange(0, len(seq), n))
+	if n <= 0:
+		raise ValueError("Chunksize must be non-negative")
+
+	count = 0
+	chunk = []
+	for el in seq:
+		chunk.append(el)
+		count += 1
+		if count >= n:
+			yield chunk
+			chunk = []
+	yield chunk
 
 def od_chunks(chunksize = 200):
 	"""Returns a generator that returns OD pair chunks based on the cell ids
