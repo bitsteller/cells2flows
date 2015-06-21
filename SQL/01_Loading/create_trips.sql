@@ -1,6 +1,7 @@
 --Drop exisiting antenna related objects
 DROP INDEX IF EXISTS idx_trips_start_antenna;
 DROP INDEX IF EXISTS idx_trips_end_antenna;
+DROP INDEX IF EXISTS idx_trips_start_end_antenna;
 DROP TABLE IF EXISTS public.trips CASCADE;
 DROP SEQUENCE IF EXISTS public.trips_id_seq;
 
@@ -64,3 +65,8 @@ CREATE INDEX idx_trips_end_antenna
   ON public.trips
   USING btree
   (end_antenna);
+
+CREATE INDEX idx_trips_start_end_antenna
+  ON public.trips
+  USING btree
+  (start_antenna, end_antenna);
