@@ -114,15 +114,14 @@ def chunks(seq, n):
 	if n <= 0:
 		raise ValueError("Chunksize must be non-negative")
 
-	count = 0
 	chunk = []
 	for el in seq:
 		chunk.append(el)
-		count += 1
-		if count >= n:
+		if len(chunk) >= n:
 			yield chunk
 			chunk = []
-	yield chunk
+	if len(chunk) > 0:
+		yield chunk
 
 def od_chunks(chunksize = 200):
 	"""Returns a generator that returns OD pair chunks based on the cell ids
