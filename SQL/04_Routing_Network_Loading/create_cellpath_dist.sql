@@ -8,10 +8,10 @@ CREATE MATERIALIZED VIEW cellpath_dist AS
           trips.end_antenna AS dest_cell, --destination cell id
           cellpath, --cellpath array containg the list of visitied cells
           COUNT(*)::double precision/(SELECT COUNT(*) 
-                                      FROM trips_all 
+                                      FROM trips AS trips_all 
                                       WHERE trips_all.start_antenna = trips.start_antenna 
                                         AND trips_all.end_antenna = trips.end_antenna 
-                                        AND tripsarray_length(cellpath,1) >= 3) 
+                                        AND array_length(cellpath,1) >= 3) 
             AS share --probablity of the cellpath for the given cell od pair
   FROM trips
   WHERE array_length(cellpath,1) >= 3
