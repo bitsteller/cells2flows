@@ -9,9 +9,8 @@ import util, config #local modules
 
 def calculate_flows(args):
 	"""Returns link flows generted by trips from cell origin to all other cells at a given hour"""
-
-	hour, od = args #arguments are passed as tuple due to pool.map() limitations
-	o, d = od
+	global hour
+	o, d = args #arguments are passed as tuple due to pool.map() limitations
 	start = time.time()
 
 	conn = util.db_connect()
@@ -24,11 +23,11 @@ def calculate_flows(args):
 				 FROM cellpath_dist, od\
 				 WHERE cellpath_dist.orig_cell = od.orig_cell \
 				 AND cellpath_dist.dest_cell = od.dest_cell \
-				 AND od.interval = %s \
-				 AND cellpath_dist.orig_cell IN %s \
-				 AND cellpath_dist.dest_cell IN %s"
+				 AND (%(interval)s IS NULL AND od.interval IS NULL) OR od.interval = %(interval)s \
+				 AND cellpath_dist.orig_cell IN %(orig_cells)s \
+				 AND cellpath_dist.dest_cell IN %(dest_cells)s"
 
-	cur.execute(flows_sql, (hour, tuple(o), tuple(d)))
+	cur.execute(flows_sql, {"interval": hour, "orig_cells": tuple(o), "dest_cells": tuple(d)})
 
 	for flow, links in cur.fetchall():
 		result.extend([(link, flow) for link in links])
@@ -52,6 +51,7 @@ def signal_handler(signal, frame):
 
 request_stop = False
 mapper = None
+hour = None
 
 if __name__ == '__main__':
 	signal.signal(signal.SIGINT, signal_handler) #abort on CTRL-C
@@ -72,17 +72,18 @@ if __name__ == '__main__':
 	cur.execute(open("SQL/04_Routing_Network_Loading/create_route_functions.sql", 'r').read())
 	conn.commit()
 
-	#calculate link flows
-	mapper = util.MapReduce(calculate_flows, add_flows) #add flows 
-	for hour in range(0,24):
+
+	#fetch different interval values
+	cur.execute("SELECT array_agg(DISTINCT interval) FROM od")
+	intervals = cur.fetchone()[0]
+	for i, interval in enumerate(intervals):
+		hour = interval
 		if request_stop:
 			break
+		print("Calculating link flows for interval " + str(interval) + " (" + str(i+1) + "/" + str(len(intervals)) + ")...")
 
-		print("Calculating link flows for interval " + str(hour) + "...")
-		args = []
-		for od in util.od_chunks(chunksize = 10):
-			args.append((hour, od))
-		linkflows = mapper(args)
+		mapper = util.MapReduce(calculate_flows, add_flows) #add flows 
+		linkflows = mapper(util.od_chunks(chunksize = 10), length = len(config.CELLS)*len(config.CELLS)//10)
 
 		print("Uploading to database...")
 		f = StringIO.StringIO("\n".join(["%i\t%f\t%i" % (linkid, hour, flow) for linkid, flow in linkflows]))
