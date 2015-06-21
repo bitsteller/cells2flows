@@ -23,12 +23,11 @@ def calculate_flows(args):
 				 FROM cellpath_dist, od\
 				 WHERE cellpath_dist.orig_cell = od.orig_cell \
 				 AND cellpath_dist.dest_cell = od.dest_cell \
-				 AND (%(interval)s IS NULL AND od.interval IS NULL) OR od.interval = %(interval)s \
+				 AND ((%(interval)s IS NULL AND od.interval IS NULL) OR (od.interval = %(interval)s)) \
 				 AND cellpath_dist.orig_cell IN %(orig_cells)s \
 				 AND cellpath_dist.dest_cell IN %(dest_cells)s"
 
 	cur.execute(flows_sql, {"interval": hour, "orig_cells": tuple(o), "dest_cells": tuple(d)})
-
 	for flow, links in cur.fetchall():
 		result.extend([(link, flow) for link in links])
 
@@ -79,7 +78,7 @@ if __name__ == '__main__':
 		print("Calculating link flows for interval " + str(interval) + " (" + str(i+1) + "/" + str(len(intervals)) + ")...")
 
 		mapper = util.MapReduce(calculate_flows, add_flows) #add flows 
-		linkflows = mapper(util.od_chunks(chunksize = 5), length = len(config.CELLS)*len(config.CELLS)//10)
+		linkflows = mapper(util.od_chunks(chunksize = 4), length = len(config.CELLS)*len(config.CELLS)//4, chunksize = 2)
 
 		print("Uploading to database...")
 		f = StringIO.StringIO("\n".join(["%i\t%f\t%i" % (linkid, hour, flow) for linkid, flow in linkflows]))
