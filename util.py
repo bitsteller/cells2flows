@@ -394,7 +394,7 @@ if not hasattr(config, "CELLS"):
 		cur.execute("SELECT MIN(id) AS min, MAX(id) AS max FROM ant_pos")
 		mincell, maxcell = cur.fetchone()
 		conn.commit()
-		config.CELLS = xrange(mincell, maxcell+1)
+		config.CELLS = range(mincell, maxcell+1)
 	except Exception, e:
 		pass
 
