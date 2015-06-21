@@ -1,5 +1,5 @@
 --create route type containging edges and a route cost
-DROP TYPE IF EXISTS route;
+DROP TYPE IF EXISTS route CASCADE;
 CREATE TYPE route AS (
     edges   integer[],
     cost    double precision
@@ -64,3 +64,22 @@ FROM possible_waypoints waypoint, route_with_waypoints(ARRAY [closest_junction($
 ORDER BY route.cost
 LIMIT 1
 $$ LANGUAGE SQL STABLE;
+
+-- get_waypoints(cellpath) returns an array of waypoints for the given cellpath by lookup in the waypoints table
+-- All 3-segments are extracted from the cellpath each of which a waypoint is looked up in the waypoint table
+CREATE OR REPLACE FUNCTION get_waypoints(integer[]) RETURNS int[] AS $$
+WITH parts AS (SELECT getParts($1) AS part)
+SELECT array_cat(ARRAY []::integer[],
+    (SELECT array_agg(
+        (SELECT waypoint 
+        FROM waypoints 
+        WHERE waypoints.part = parts.part))
+    FROM parts))
+$$ LANGUAGE SQL STABLE;
+
+
+--Test:
+--SELECT trips.cellpath, array_append(array_prepend(best_startpoint(trips.cellpath), get_waypoints(trips.cellpath)),best_endpoint(trips.cellpath)) AS waypoints, 
+--    (route_with_waypoints(array_append(array_prepend(best_startpoint(trips.cellpath), get_waypoints(trips.cellpath)),best_endpoint(trips.cellpath)))).edges AS links
+--FROM trips_cellpath AS trips
+--LIMIT 10
