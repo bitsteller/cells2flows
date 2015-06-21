@@ -22,11 +22,11 @@ def calculate_flows(args):
 	flows_sql = "SELECT cellpath_dist.share * od.flow AS flow, \
 						(route_with_waypoints(array_append(array_prepend(best_startpoint(cellpath_dist.cellpath), get_waypoints(cellpath_dist.cellpath)), best_endpoint(cellpath_dist.cellpath)))).edges AS links \
 				 FROM cellpath_dist, od\
-				 WHERE cellpath_dist.start_antenna = od.start_antenna \
-				 AND cellpath_dist.end_antenna = od.end_antenna \
-				 AND od.time_interval = %s \
-				 AND cellpath_dist.start_antenna IN %s \
-				 AND cellpath_dist.end_antenna IN %s"
+				 WHERE cellpath_dist.orig_cell = od.orig_cell \
+				 AND cellpath_dist.dest_cell = od.dest_cell \
+				 AND od.interval = %s \
+				 AND cellpath_dist.orig_cell IN %s \
+				 AND cellpath_dist.dest_cell IN %s"
 
 	cur.execute(flows_sql, (hour, tuple(o), tuple(d)))
 
