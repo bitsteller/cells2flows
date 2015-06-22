@@ -76,10 +76,10 @@ Install the following python libraries using pip:
 
 You will have to adjust the following parsing functions to be able to read your input file formats.
 
-- parse_trajectory(linestr):
-- parse_antenna(linestr):
-- parse_trip(linestr):
-- parse_taz(feature):
+- parse_trajectory(linestr)
+- parse_antenna(linestr)
+- parse_trip(linestr)
+- parse_taz(feature)
 
 You find these functions including documentation on what they need to return, in the file `util.py`.
 
@@ -88,6 +88,7 @@ You find these functions including documentation on what they need to return, in
 All configuration parameters are set in the file `config.py`. The available parameters are:
 
 ## Database credentials 
+
 - `DATABASE`: name of the postgres database to connect to
 - `USER`: database username to use
 - `PORT`: port to use for the database connection
