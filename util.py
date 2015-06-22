@@ -209,8 +209,8 @@ class MapReduce(object):
 		"""
 		self.map_func = map_func
 		self.reduce_func = reduce_func
-		self.mappool = multiprocessing.Pool(num_workers)
-		self.reducepool = multiprocessing.Pool(num_workers)
+		self.mappool = multiprocessing.Pool(num_workers, maxtasksperchild = 1000)
+		self.reducepool = multiprocessing.Pool(num_workers, maxtasksperchild = 1000)
 		self.request_stop = False
 		self.num_workers = num_workers
 		self.enqueued = 0
@@ -338,7 +338,7 @@ class ParMap(MapReduce):
 		  number of CPUs available on the current host.
 		"""
 		self.map_func = map_func
-		self.mappool = multiprocessing.Pool(num_workers)
+		self.mappool = multiprocessing.Pool(num_workers, maxtasksperchild = 1000)
 		self.request_stop = False
 		self.num_workers = num_workers
 		self.enqueued = 0
