@@ -1,0 +1,43 @@
+import datetime, time
+
+# DATABASE = "senegal"
+# USER = "d4d"
+# PORT = 5432
+# MAX_ANTENNA_ID = 470
+# ANTENNA_TABLE = "senegal_ant_pos"
+# TRIPS_TABLE = "trips"
+# TRIPS_CELLPATH_TABLE = "trips_cellpath"
+# CELLS = range(1,101) #cell ids to use (1-500)
+# BBOX = {
+#  			"top": 14.919,
+#  			"bottom": 14.578,
+#  			"left": -17.586,
+#  			"right": -17.102
+#  		}
+
+DATABASE = "postgres"
+USER = "nils"
+PORT = 4320
+TRIPS_TABLE = "trips"
+TRIPS_CELLPATH_TABLE = "trips_cellpath"
+CELLS = range(0,4) #cell ids to use range(mincell, maxcellid+1), if not set all cells in ant_pos table are used
+#TRIPS = range(0,1000000) #trip ids to use, if not set all loaded trips are used
+PASSWORD = ""
+MIN_ANTENNA_DIST = 150 #min distance between antennas in meteres (antennas with a smaller distance are merged during clustering)
+
+ANTENNA_FILE = "/Users/nils/Documents/Studium/Exjobb/ATT/cells.xy"
+#TRIPS_FILE = "/Users/nils/Documents/Studium/Exjobb/ATT/SSTEM_10K/SSTEM_temp.csv"
+TRIPS_FILE = "/Users/nils/Documents/Studium/Exjobb/ATT/Routes_and_SSTEM_1M/SSTEM_1M.csv"
+TAZ_FILE = "/Users/nils/Documents/Studium/Exjobb/ATT/taz.geojson"
+OD_FILE = "/Users/nils/Documents/Studium/Exjobb/ATT/od.pkl"
+BBOX = {
+			"top": 34.34,
+			"bottom": 33.87,
+			"left": -118.4,
+			"right": -117.6
+		}
+
+# SAMPLE_FILENAME = "/Users/nils/Documents/Studium/Exjobb/ATT/stem_LA_sample_users_all_type_6_0902.csv"
+# SAMPLE_DAY_NO_TZ = datetime.datetime(2014,9,2)
+# SAMPLE_DAY = SAMPLE_DAY_NO_TZ + datetime.timedelta(hours = -7) #sample day in UTC!
+# SAMPLE_SIZE = 100
