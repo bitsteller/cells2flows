@@ -72,10 +72,50 @@ Install the following python libraries using pip:
 * geopy
 * keyring (optional)
 	
-# Adjust parsing functions 
+# Adjust parsing functions
+
+You will have to adjust the following parsing functions to be able to read your input file formats.
+
+- parse_trajectory(linestr):
+- parse_antenna(linestr):
+- parse_trip(linestr):
+- parse_taz(feature):
+
+You find these functions including documentation on what they need to return, in the file `util.py`.
 
 # Adjust configuration parameters
-	
+
+All configuration parameters are set in the file `config.py`. The available parameters are:
+
+## Database credentials 
+- `DATABASE`: name of the postgres database to connect to
+- `USER`: database username to use
+- `PORT`: port to use for the database connection
+- `PASSWORD` (optional): password for the databse connection. If you don't won't to save the password in cleartext, you can leave this parameter out and you will be promptet during runtime with the option to save the password in the system keychain instead
+
+## Loading parameters
+`ANTENNA_FILE`: filname of the csv file containing the antenna positions
+`TRIPS_FILE`: filname of the csv file containing the trips (STEM data/cellpaths)
+`TAZ_FILE`: filname of the geojson file containing the TAZ geometries
+`OD_FILE`: filename of the pickle file containing the OD flows for pairs of TAZs
+
+## Computation parameters
+- `TRIPS_TABLE` (deprecated): table name of the trip table 
+- `TRIPS_CELLPATH_TABLE` (deprecated): no longer in use
+- `CELLS` (optional):  a sequence of cell ids to use for the computation, be careful that after antenna clustering ids might change. If the this paramter is omitted, all cells are used by default.
+- `TRIPS`: trip ids to use, if not set all loaded trips are used
+- `MIN_ANTENNA_DIST`: min distance between antennas in meteres (antennas with a smaller distance are merged during clustering)
+- `BBOX`: A dictionary containing a bounding box for which the calculation is done (Voronoi cells will be cut of at the end of the bounding box)
+
+An example bounding box dictionary looks like this:
+
+	BBOX = {
+			"top": 34.34,
+			"bottom": 33.87,
+			"left": -118.4,
+			"right": -117.6
+		}
+
 # Run the full traffic assignment procedure
 	
 When you performed all the previous steps , you can run the whole pipleline through:
