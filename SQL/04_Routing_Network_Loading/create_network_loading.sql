@@ -29,7 +29,7 @@ CREATE OR REPLACE VIEW public.loaded_links AS
             network_loading.flow,
             network_loading.interval
            FROM network_loading
-          WHERE network_loading.interval IS NULL
+          WHERE network_loading.interval = -1
         )
  SELECT hh_2po_4pgr.id,
     hh_2po_4pgr.geom_way,
@@ -42,5 +42,5 @@ CREATE OR REPLACE VIEW public.loaded_links AS
 
 COMMENT ON VIEW public.loaded_links IS 
 'Contains the network loading result including the link geometries to view the result in GIS tools. To view a certain interval, 
-change the line "WHERE network_loading.interval IS NULL" to "WHERE network_loading.interval = $desired_interval".
+change the line "WHERE network_loading.interval = -1" to "WHERE network_loading.interval = $desired_interval".
 '

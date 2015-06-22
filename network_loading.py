@@ -34,7 +34,6 @@ def calculate_flows(args):
 	end = time.time()
 	conn.close()
 	return result
-	#print(str(o) + "->" + str(d) + " done after " + str(end-start) + "s")
 
 def add_flows(item):
 	link, flows = item
@@ -78,9 +77,13 @@ if __name__ == '__main__':
 		print("Calculating link flows for interval " + str(interval) + " (" + str(i+1) + "/" + str(len(intervals)) + ")...")
 
 		mapper = util.MapReduce(calculate_flows, add_flows) #add flows 
-		linkflows = mapper(util.od_chunks(chunksize = 4), length = len(config.CELLS)*len(config.CELLS)//4, chunksize = 2)
+		linkflows = mapper(util.od_chunks(chunksize = 2), length = len(config.CELLS)*len(config.CELLS)//2, chunksize = 1)
 
 		print("Uploading to database...")
-		f = StringIO.StringIO("\n".join(["%i\t%f\t%i" % (linkid, hour, flow) for linkid, flow in linkflows]))
-		cur.copy_from(f, 'network_loading', columns=('id', 'interval', 'flow'))
+		if interval == None:
+			f = StringIO.StringIO("\n".join(["%i\tNULL\t%f" % (linkid, flow) for linkid, flow in linkflows]))
+		else:
+			f = StringIO.StringIO("\n".join(["%i\t%i\t%f" % (linkid, interval, flow) for linkid, flow in linkflows]))
+
+		cur.copy_from(f, 'network_loading', columns=('id', 'interval', 'flow'), null = "NULL")
 		conn.commit()

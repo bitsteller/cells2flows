@@ -59,10 +59,10 @@ if __name__ == '__main__':
 	print("Loading OD data...")
 	od_pkl = pickle.load(open(config.OD_FILE, 'r'))
 
-	print("Parsing OD data...")
-	rows = ["%i\t%i\t%i" % (int(float(ostr)), int(float(dstr)), flow) for (ostr, dstr), flow in od_pkl['0'].items()]
+	print("Parsing OD data...") #no time-slicing -> interval is -1
+	rows = ["%i\t%i\t-1\t%i" % (int(float(ostr)), int(float(dstr)), flow) for (ostr, dstr), flow in od_pkl['0'].items()]
 	f = StringIO.StringIO("\n".join(rows))
 
 	print("Upload OD data to database (takes a while)...")
-	cur.copy_from(f, 'taz_od', columns=('origin_taz', 'destination_taz', 'flow'))
+	cur.copy_from(f, 'taz_od', columns=('origin_taz', 'destination_taz', 'interval', 'flow'))
 	conn.commit()
