@@ -95,10 +95,10 @@ All configuration parameters are set in the file `config.py`. The available para
 - `PASSWORD` (optional): password for the databse connection. If you don't won't to save the password in cleartext, you can leave this parameter out and you will be promptet during runtime with the option to save the password in the system keychain instead
 
 ## Loading parameters
-`ANTENNA_FILE`: filname of the csv file containing the antenna positions
-`TRIPS_FILE`: filname of the csv file containing the trips (STEM data/cellpaths)
-`TAZ_FILE`: filname of the geojson file containing the TAZ geometries
-`OD_FILE`: filename of the pickle file containing the OD flows for pairs of TAZs
+- `ANTENNA_FILE`: filname of the csv file containing the antenna positions
+- `TRIPS_FILE`: filname of the csv file containing the trips (STEM data/cellpaths)
+- `TAZ_FILE`: filname of the geojson file containing the TAZ geometries
+- `OD_FILE`: filename of the pickle file containing the OD flows for pairs of TAZs
 
 ## Computation parameters
 - `TRIPS_TABLE` (deprecated): table name of the trip table 
