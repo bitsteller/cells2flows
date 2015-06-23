@@ -74,7 +74,7 @@ if __name__ == '__main__':
 		print("Calculating link flows for interval " + str(interval) + " (" + str(i+1) + "/" + str(len(config.INTERVALS)) + ")...")
 
 		mapper = util.MapReduce(calculate_flows, add_flows) #add flows 
-		linkflows = mapper(util.od_chunks(chunksize = 2), length = len(config.CELLS)*len(config.CELLS)//2, chunksize = 1)
+		linkflows = mapper(util.od_chunks(chunksize = 3), length = len(config.CELLS)*len(config.CELLS)//2)
 
 		print("Uploading to database...")
 		f = StringIO.StringIO("\n".join(["%i\t%i\t%f" % (linkid, interval, flow) for linkid, flow in linkflows]))
