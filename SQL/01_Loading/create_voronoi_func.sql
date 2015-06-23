@@ -810,7 +810,7 @@ plpy.debug("got width: %s" % width)
 plpy.debug("got height: %s" % height)
  
 # we need to use distinct, because the code barfs if we have duplicate points
-for row in plpy.execute("SELECT DISTINCT st_x(%s) as x, st_y(%s) as y FROM %s ORDER BY id" % (geom_col, geom_col, table_name)):
+for row in plpy.execute("SELECT DISTINCT id, st_x(%s) as x, st_y(%s) as y FROM %s ORDER BY id" % (geom_col, geom_col, table_name)):
   pts.append(Site(row["x"] - extent["xmin"],row["y"] - extent["ymin"]))     # note reative coordinates
  
 # do the real work
