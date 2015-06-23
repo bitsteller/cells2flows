@@ -11,7 +11,7 @@ cur.execute(open("SQL/01_Loading/create_voronoi.sql", 'r').read())
 
 print("Creating voronoi() function...")
 cur.execute(open("SQL/01_Loading/create_voronoi_func.sql", 'r').read())
-cur.commit()
+conn.commit()
 
 print("Calculating Voronoi partition...")
 cur.execute("	DROP TABLE IF EXISTS ant_pos_ordered;\
