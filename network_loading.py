@@ -80,10 +80,7 @@ if __name__ == '__main__':
 		linkflows = mapper(util.od_chunks(chunksize = 2), length = len(config.CELLS)*len(config.CELLS)//2, chunksize = 1)
 
 		print("Uploading to database...")
-		if interval == None:
-			f = StringIO.StringIO("\n".join(["%i\tNULL\t%f" % (linkid, flow) for linkid, flow in linkflows]))
-		else:
-			f = StringIO.StringIO("\n".join(["%i\t%i\t%f" % (linkid, interval, flow) for linkid, flow in linkflows]))
+		f = StringIO.StringIO("\n".join(["%i\t%i\t%f" % (linkid, interval, flow) for linkid, flow in linkflows]))
 
 		cur.copy_from(f, 'network_loading', columns=('id', 'interval', 'flow'), null = "NULL")
 		conn.commit()
