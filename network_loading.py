@@ -66,11 +66,8 @@ if __name__ == '__main__':
 	cur.execute(open("SQL/04_Routing_Network_Loading/create_route_functions.sql", 'r').read())
 	conn.commit()
 
-
 	#fetch different interval values
-	cur.execute("SELECT array_agg(DISTINCT interval) FROM od")
-	intervals = cur.fetchone()[0]
-	for i, interval in enumerate(intervals):
+	for i, interval in enumerate(config.INTERVALS):
 		hour = interval
 		if request_stop:
 			break

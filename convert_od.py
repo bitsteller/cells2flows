@@ -119,9 +119,7 @@ if __name__ == '__main__':
 	conn.commit()
 
 	#fetch different interval values
-	cur.execute("SELECT array_agg(DISTINCT interval) FROM taz_od")
-	intervals = cur.fetchone()[0]
-	for i, interval in enumerate(intervals):
+	for i, interval in enumerate(config.INTERVALS):
 		print("Converting TAZ OD flows to cell OD flows for interval " + str(interval) + " (" + str(i+1) + "/" + str(len(intervals)) + ")...")
 
 		#count OD pairs in TAZ OD for given interval
