@@ -120,7 +120,7 @@ if __name__ == '__main__':
 
 	#fetch different interval values
 	for i, interval in enumerate(config.INTERVALS):
-		print("Converting TAZ OD flows to cell OD flows for interval " + str(interval) + " (" + str(i+1) + "/" + str(len(intervals)) + ")...")
+		print("Converting TAZ OD flows to cell OD flows for interval " + str(interval) + " (" + str(i+1) + "/" + str(len(config.INTERVALS)) + ")...")
 
 		#count OD pairs in TAZ OD for given interval
 		cur.execute("SELECT COUNT(*) \

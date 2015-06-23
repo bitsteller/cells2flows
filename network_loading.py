@@ -71,7 +71,7 @@ if __name__ == '__main__':
 		hour = interval
 		if request_stop:
 			break
-		print("Calculating link flows for interval " + str(interval) + " (" + str(i+1) + "/" + str(len(intervals)) + ")...")
+		print("Calculating link flows for interval " + str(interval) + " (" + str(i+1) + "/" + str(len(config.INTERVALS)) + ")...")
 
 		mapper = util.MapReduce(calculate_flows, add_flows) #add flows 
 		linkflows = mapper(util.od_chunks(chunksize = 2), length = len(config.CELLS)*len(config.CELLS)//2, chunksize = 1)
