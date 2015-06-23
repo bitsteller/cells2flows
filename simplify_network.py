@@ -18,9 +18,9 @@ def simplify(cell):
 
 def signal_handler(signal, frame):
 	global mapper, request_stop
+	request_stop = True
 	if mapper:
 		mapper.stop()
-	request_stop = True
 	print("Aborting (can take a minute)...")
 	sys.exit(1)
 
