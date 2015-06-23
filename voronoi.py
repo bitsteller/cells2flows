@@ -14,5 +14,8 @@ cur.execute(open("SQL/01_Loading/create_voronoi_func.sql", 'r').read())
 cur.commit()
 
 print("Calculating Voronoi partition...")
-cur.execute("INSERT INTO voronoi SELECT v.id, v.geom FROM voronoi('ant_pos', 'geom') AS v(id numeric(10,0), geom geometry(Polygon,4326))")
+cur.execute("	DROP TABLE IF EXISTS ant_pos_ordered;\
+        		CREATE TEMPORARY TABLE ant_pos_ordered (LIKE ant_pos);\
+       			INSERT INTO ant_pos_ordered SELECT * FROM ant_pos wp ORDER BY id ASC;")
+cur.execute("INSERT INTO voronoi SELECT v.id, v.geom FROM voronoi('ant_pos_ordered', 'geom') AS v(id numeric(10,0), geom geometry(Polygon,4326))")
 conn.commit()
