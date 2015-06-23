@@ -38,11 +38,11 @@ if __name__ == '__main__':
 	cur.execute(open("SQL/02_Network_Simplification/create_hh_2po_4pgr_vertices.sql", 'r').read())
 	conn.commit()
 
-	print("Creating views for border links/junctions...")
+	print("Creating views for border links/junctions (takes a while)...")
 	cur.execute(open("SQL/02_Network_Simplification/borders.sql", 'r').read())
 	conn.commit()
 
-	print("Simplifing network (step 1/2)...")
+	print("Simplifing network (step 1/2) (takes a while)...")
 	cur.execute(open("SQL/02_Network_Simplification/simplify_step1.sql", 'r').read())
 	conn.commit()
 

@@ -23,7 +23,7 @@ def calculate_flows(args):
 				 FROM cellpath_dist, od\
 				 WHERE cellpath_dist.orig_cell = od.orig_cell \
 				 AND cellpath_dist.dest_cell = od.dest_cell \
-				 AND ((%(interval)s IS NULL AND od.interval IS NULL) OR (od.interval = %(interval)s)) \
+				 AND od.interval = %(interval)s \
 				 AND cellpath_dist.orig_cell IN %(orig_cells)s \
 				 AND cellpath_dist.dest_cell IN %(dest_cells)s"
 
