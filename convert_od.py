@@ -2,7 +2,12 @@ import psycopg2, signal, sys, time
 
 import util, config #local modules
 
-CHUNKSIZE = 100
+CHUNKSIZE = 1000
+
+def init():
+	global conn, cur
+	conn = util.db_connect()
+	cur = conn.cursor()
 
 def fetch_taz_od_chunks():
 	"""Fetches chunks of rows from the taz_od table of the database
@@ -10,15 +15,13 @@ def fetch_taz_od_chunks():
 		a generator returning lists containing row tuples (origin_taz, destination_taz, flow) fetched from the database
 	"""
 
-	conn = util.db_connect()
-	cur = conn.cursor()
-	cur.execute("SELECT origin_taz, destination_taz, flow  \
+	cur2.execute("SELECT origin_taz, destination_taz, flow  \
 			 FROM taz_od \
 			 WHERE ((interval IS NULL AND %(interval)s IS NULL) OR interval = %(interval)s)",
 			 {"interval": interval})
 
 	batch = []
-	for o_taz, d_taz, flow in cur:
+	for o_taz, d_taz, flow in cur2:
 		batch.append((o_taz, d_taz, flow))
 		if len(batch) == CHUNKSIZE:
 			yield batch
@@ -33,10 +36,7 @@ def calculate_cell_od_flow(taz_od_chunk):
 	Returns:
 		A list of tuples ((origin_cell, destination_cell), flow)
 	"""
-	global interval
-
-	conn = util.db_connect()
-	cur = conn.cursor()
+	global interval, cur, conn
 	result = []
 
 	#fetch origin/destination cell coverages
@@ -77,13 +77,11 @@ def upload_cell_od_flow(args):
 		args: a tuple (key, flows), where key is a tuple (o_cell, d_cell) containing the originn and desitination cell ids and
 			flows is a list of flows that occur on the given OD pair
 	"""
-	global interval
+	global interval, cur, conn
+
 	key, flows = args
 	o_cell, d_cell = key
 	flow = sum(flows)
-
-	conn = util.db_connect()
-	cur = conn.cursor()
 	
 	data = {"orig_cell": o_cell,
 			"dest_cell": d_cell,
@@ -104,34 +102,39 @@ def signal_handler(signal, frame):
 request_stop = False
 mapper = None
 interval = None
+cur = None
+conn = None
 
 if __name__ == '__main__':
 	signal.signal(signal.SIGINT, signal_handler) #abort on CTRL-C
-	util.db_login()
-	conn = util.db_connect()
-	cur = conn.cursor()
+	conn2 = util.db_connect()
+	cur2 = conn2.cursor()
 
 	print("Creating od table...")
-	cur.execute(open("SQL/01a_Preprocessing/create_od.sql", 'r').read())
-	conn.commit()
+	cur2.execute(open("SQL/01a_Preprocessing/create_od.sql", 'r').read())
+	conn2.commit()
 
 	print("Creating taz_cell view mapping TAZ to cells...")
-	cur.execute(open("SQL/01a_Preprocessing/create_get_cells_for_taz_func.sql", 'r').read())
-	conn.commit()
+	cur2.execute(open("SQL/01a_Preprocessing/create_get_cells_for_taz_func.sql", 'r').read())
+	conn2.commit()
 
 	#fetch different interval values
 	for i, interval in enumerate(config.INTERVALS):
 		print("Converting TAZ OD flows to cell OD flows for interval " + str(interval) + " (" + str(i+1) + "/" + str(len(config.INTERVALS)) + ")...")
 
 		#count OD pairs in TAZ OD for given interval
-		cur.execute("SELECT COUNT(*) \
+		cur2.execute("SELECT COUNT(*) \
 					 FROM taz_od \
-					 WHERE ((interval IS NULL AND %(interval)s IS NULL) OR interval = %(interval)s)",
+					 WHERE interval = %(interval)s",
 					 {"interval": interval})
-		count = cur.fetchone()[0]
+		count = cur2.fetchone()[0]
 
 		#convert to cell flows
-		mapper = util.MapReduce(calculate_cell_od_flow, upload_cell_od_flow)
-		mapper(fetch_taz_od_chunks(), length = count/CHUNKSIZE, pipe = True, out = False)
+		mapper = util.MapReduce(calculate_cell_od_flow, upload_cell_od_flow, initializer = init)
+		od_flows = mapper(fetch_taz_od_chunks(), length = count//CHUNKSIZE + 1, pipe = True, out = False, chunksize = 1)
 
+		#print("Uploading data to database...")
+		#f = StringIO.StringIO("\n".join(["%i\t%i\t%i\t%f" % (o_cell, d_cell, interval, flow) for (o_cell,d_cell), flow in od_flows]))
 
+		#cur.copy_from(f, 'network_loading', columns=('orig_cell', 'dest_cell' 'interval', 'flow'))
+		#conn.commit()
