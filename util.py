@@ -168,6 +168,8 @@ def db_login(force_password=False):
 			print("Password has been stored. You will not have to enter it again the next time. If you need to edit the password use the keychain manager of your system.")
 
 def db_connect():
+	if "PASSWORD" in dir(config) == None:
+		db_login()
 	return psycopg2.connect("dbname=" + config.DATABASE + " user=" + config.USER + " password=" + config.PASSWORD + " host=localhost " + " port=" + str(config.PORT))
 
 def partition(mapped_values):
