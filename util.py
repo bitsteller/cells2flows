@@ -187,7 +187,7 @@ def partition(mapped_values):
 	return partitioned_data.items()
 
 class MapReduce(object):
-	def __init__(self, map_func, reduce_func, num_workers=multiprocessing.cpu_count()):
+	def __init__(self, map_func, reduce_func, num_workers=multiprocessing.cpu_count(), initializer = None):
 		"""
 		map_func
 
@@ -209,8 +209,8 @@ class MapReduce(object):
 		"""
 		self.map_func = map_func
 		self.reduce_func = reduce_func
-		self.mappool = multiprocessing.Pool(num_workers, maxtasksperchild = 1000)
-		self.reducepool = multiprocessing.Pool(num_workers, maxtasksperchild = 1000)
+		self.mappool = multiprocessing.Pool(num_workers, maxtasksperchild = 1000, initializer = initializer)
+		self.reducepool = multiprocessing.Pool(num_workers, maxtasksperchild = 1000, initializer = initializer)
 		self.request_stop = False
 		self.num_workers = num_workers
 		self.enqueued = 0
@@ -324,7 +324,7 @@ def void(arg):
 		return arg
 
 class ParMap(MapReduce):
-	def __init__(self, map_func, num_workers=multiprocessing.cpu_count()):
+	def __init__(self, map_func, num_workers=multiprocessing.cpu_count(), initializer = None):
 		"""
 		map_func
 
@@ -338,7 +338,7 @@ class ParMap(MapReduce):
 		  number of CPUs available on the current host.
 		"""
 		self.map_func = map_func
-		self.mappool = multiprocessing.Pool(num_workers, maxtasksperchild = 1000)
+		self.mappool = multiprocessing.Pool(num_workers, maxtasksperchild = 1000, initializer = initializer)
 		self.request_stop = False
 		self.num_workers = num_workers
 		self.enqueued = 0
