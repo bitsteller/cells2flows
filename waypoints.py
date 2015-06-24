@@ -66,7 +66,7 @@ def best_waypoint(segments):
 	cur.close()
 
 
-def route_cost(xlat, xlon, ylat, ylon, zlat, zlon):
+def route_cost(xlat, xlon, ylat, ylon, zlat, zlon, attempts = 3):
 	"""Calculates the cost from x via y to z; OSRM backend needs to listen at port 5000
 	Args:
 		xlat: latitude of the start point
@@ -78,7 +78,16 @@ def route_cost(xlat, xlon, ylat, ylon, zlat, zlon):
 	Returns:
 		The cost of the calculated route (travel time in seconds) or inf if no route found"""
 
-	data = json.load(urllib2.urlopen('http://www.server.com:5000/viaroute?loc=' + str(xlat) + ',' + str(xlon) + '&loc=' + str(ylat) + ',' + str(ylon) + '&loc=' + str(zlat) + ',' + str(zlon)))
+	data = {}
+	try:
+		data = json.load(urllib2.urlopen('http://www.server.com:5000/viaroute?loc=' + str(xlat) + ',' + str(xlon) + '&loc=' + str(ylat) + ',' + str(ylon) + '&loc=' + str(zlat) + ',' + str(zlon)))
+	except Exception, e:
+		print("WARNING: " + e.message)
+		if attemps > 0:
+			route_cost(xlat, xlon, ylat, ylon, zlat, zlon, attempts = attemps - 1)
+		else:
+			raise e
+
 	if "route_summary" in data:
 		return data["route_summary"]["total_time"]
 	else: #no feasible route found, return infinite cost
@@ -106,7 +115,7 @@ if __name__ == '__main__':
 	cur = conn.cursor()
 
 	print("Creating waypoints table...")
-	cur.execute(open("SQL/04_Routing_Network_Loading/create_waypoints.sql", 'r').read())
+	#cur.execute(open("SQL/04_Routing_Network_Loading/create_waypoints.sql", 'r').read())
 	conn.commit()
 
 	print("Creating closest_junction() function...")

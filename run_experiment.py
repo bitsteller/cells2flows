@@ -29,7 +29,6 @@ def message(text):
 			p = subprocess.Popen(config.NOTIFY_CMD, stdin=subprocess.PIPE, shell=True)
 			p.communicate(text + "\n")
 		except Exception, e:
-			raise e
 			print("Notify command could not be executed: " + e.message)
 
 start_step = 0
