@@ -105,6 +105,7 @@ All configuration parameters are set in the file `config.py`. The available para
 - `TRIPS_CELLPATH_TABLE` (deprecated): no longer in use
 - `CELLS` (optional):  a sequence of cell ids to use for the computation, be careful that after antenna clustering ids might change. If the this paramter is omitted, all cells are used by default.
 - `TRIPS`: trip ids to use, if not set all loaded trips are used
+- `NOTIFY_CMD`: a command that will be called upon completion or failure of the traffic assignment, a message is passed to the command through STDIN. The script could for example send a push notification to www.boxcar.io or send an email to notify you of the computation status
 - `MIN_ANTENNA_DIST`: min distance between antennas in meteres (antennas with a smaller distance are merged during clustering)
 - `BBOX`: A dictionary containing a bounding box for which the calculation is done (Voronoi cells will be cut of at the end of the bounding box)
 

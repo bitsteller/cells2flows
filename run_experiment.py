@@ -1,6 +1,6 @@
-import os, sys, time
+import os, sys, time, subprocess
 
-import util
+import util, config
 
 preparations = [ "install and init a postgres database",
 				 "install postgis and pgrouting for the database",
@@ -21,6 +21,17 @@ steps = [
 			("Loading network", "network_loading.py")
 		]
 
+
+def message(text):
+	print(text)
+	if hasattr(config, "NOTIFY_CMD"):
+		try:
+			p = subprocess.Popen(config.NOTIFY_CMD, stdin=subprocess.PIPE, shell=True)
+			p.communicate(text + "\n")
+		except Exception, e:
+			raise e
+			print("Notify command could not be executed: " + e.message)
+
 start_step = 0
 if util.confirm("Did you already run parts of the procedure before?", allow_empty = True, default = False):
 	print("\n".join(["[" + str(i+1) + "] " + action for i, (action, script) in enumerate(steps)]))
@@ -36,12 +47,13 @@ for i, (action, script) in enumerate(steps[start_step:]):
 	start = time.time()
 	if os.system("python " + script) == 0:
 		end = time.time()
-		print(action + " finished successfully after " +  str((end-start)/60.0) + " minutes.")
+		message(action + " finished successfully after " +  str((end-start)/60.0) + " minutes.")
 	else:
-		print("\033[91m" + action + " exited with errors.\033[0m The rest of the pipeline cannot be executed before this step finished successfully.")
+		message("\033[91m" + action + " exited with errors.\033[0m The rest of the pipeline cannot be executed before this step finished successfully.")
 		start_step = start_step + i
 		if start_step > 1:
-			print("You can start the procedure from step " + str(start_step + 1) + " next time in order to skip the previous steps that finished successfully.")
+			message("You can start the procedure from step " + str(start_step + 1) + " next time in order to skip the previous steps that finished successfully.")
 		sys.exit()
 
-print("Done. Find your experiment results in the database.")
+message("Computation done. Find your experiment results in the database.")
+
