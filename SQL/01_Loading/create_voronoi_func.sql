@@ -811,7 +811,7 @@ plpy.debug("got height: %s" % height)
  
 # we need to use distinct, because the code barfs if we have duplicate points
 for row in plpy.execute("SELECT DISTINCT id, st_x(%s) as x, st_y(%s) as y FROM %s ORDER BY id" % (geom_col, geom_col, table_name)):
-  pts.append(Site(row["x"] - extent["xmin"],row["y"] - extent["ymin"]))     # note reative coordinates
+  pts.append(Site(row["x"] - extent["xmin"],row["y"] - extent["ymin"], sitenum = row["id"]))     # note reative coordinates
  
 # do the real work
 sl = SiteList(pts)
@@ -823,7 +823,7 @@ for site, edges in c.polygons.iteritems():
     lines_wkt = lines_as_wkt(lines)
     if lines_wkt is not None:
         rv = plpy.execute("SELECT ST_ConvexHull(ST_MPointFromText('%s',%i)) AS the_geom" % (lines_wkt,srid))
-        yield (site+1, rv[0]['the_geom'])
+        yield (site, rv[0]['the_geom'])
  
 $$ LANGUAGE plpythonu;
  
