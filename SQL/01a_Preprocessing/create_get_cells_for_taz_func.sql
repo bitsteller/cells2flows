@@ -25,5 +25,9 @@ CREATE MATERIALIZED VIEW taz_cells AS
     LATERAL get_cells_for_taz(taz.taz_id) get_cells_for_taz(cellid, share)
 WITH DATA;
 
+CREATE INDEX idx_taz_cells_taz_id
+  ON public.taz_cells
+  USING btree
+  (taz_id);
 
 --SELECT get_cells_for_taz(22062000)
