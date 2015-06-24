@@ -428,7 +428,7 @@ if not hasattr(config, "INTERVALS"):
 		db_login()
 		conn = db_connect()
 		cur = conn.cursor()
-		cur.execute("SELECT array_agg(DISTINCT interval) FROM od")
+		cur.execute("SELECT array_agg(DISTINCT interval) FROM taz_od")
 		config.INTERVALS = cur.fetchone()[0]
 		conn.close()
 	except Exception, e:
