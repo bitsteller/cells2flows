@@ -70,3 +70,11 @@ CREATE INDEX idx_trips_start_end_antenna
   ON public.trips
   USING btree
   (start_antenna, end_antenna);
+
+--create a view containg lines connecting the cell centroids in every trip
+CREATE OR REPLACE VIEW trips_geom AS 
+ SELECT trips.id,
+    st_makeline(ant_pos.geom) AS st_makeline
+   FROM trips,
+    ant_pos
+  GROUP BY trips.id;
