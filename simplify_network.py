@@ -10,7 +10,7 @@ def init():
 
 def simplify(cell):
 	global conn, cur
-	
+
 	try:
 		cur.execute(open("SQL/02_Network_Simplification/simplify_step2.sql", 'r').read(), {"cell": cell})
 	except psycopg2.IntegrityError, e:
@@ -55,4 +55,4 @@ if __name__ == '__main__':
 
 	print("Simplifing network (step 2/2)...")
 	mapper = util.ParMap(simplify, initializer = init)
-	mapper(config.CELLS, chunksize = 1)
+	mapper(config.CELLS, chunksize = 5)
