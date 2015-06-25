@@ -89,7 +89,7 @@ if __name__ == '__main__':
 	signal.signal(signal.SIGINT, signal_handler) #abort on CTRL-C
 	util.db_login()
 	mconn = util.db_connect()
-	mcur = conn.cursor()
+	mcur = mconn.cursor()
 
 	print("Recreating ant_pos table...")
 	mcur.execute(open("SQL/01_Loading/create_ant_pos.sql", 'r').read())
@@ -121,9 +121,9 @@ if __name__ == '__main__':
 			newcells[oldid] = newid
 
 	print("Updateting antennas...")
-	mapper = util.ParMap(join_cells, num_workers = 1, initializer = init) #not parallizable due to necessary write access to cellpath arrays, ParMap just for status indicator
-	mapper(enumerate(components), chunksize = 5, length = len(components))
+	mapper = util.ParMap(join_cells, initializer = init)
+	mapper(enumerate(components), length = len(components))
 
 	print("Updateting trips...")
-	mapper = util.ParMap(update_trip) #not parallizable due to necessary write access to cellpath arrays, ParMap just for status indicator
-	mapper(config.TRIPS, chunksize = 1000, initializer = init)
+	mapper = util.ParMap(update_trip, initializer = init)
+	mapper(config.TRIPS, chunksize = 5000)
