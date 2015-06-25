@@ -14,7 +14,7 @@ steps = [
 			("Backup original antenna and trip data", "backup_original.py"),
 			("Cluster antennas and preprocess trips", "cluster_antennas.py"), #comment out, if you want to keep original antennas
 			("Calculate Voronoi diagram", "voronoi.py"),
-			("Calculate simplified network", "simplify_network.py"),
+			("Simplify road network", "simplify_network.py"),
 			("Convert OD matrix to cell matrix", "convert_od.py"),
 			("Calculate waypoints", "waypoints.py"),
 			("Calculate cellpath distribution", "cellpath_dist.py"),
