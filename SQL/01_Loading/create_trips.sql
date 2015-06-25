@@ -74,7 +74,8 @@ CREATE INDEX idx_trips_start_end_antenna
 --create a view containg lines connecting the cell centroids in every trip
 CREATE OR REPLACE VIEW trips_geom AS 
  SELECT trips.id,
-    st_makeline(ant_pos.geom) AS st_makeline
-   FROM trips,
-    ant_pos
-  GROUP BY trips.id;
+    ( SELECT st_makeline(( SELECT ant_pos.geom
+                   FROM ant_pos
+                  WHERE ant_pos.id = cellid.cellid)) AS st_makeline
+           FROM unnest(trips.cellpath) cellid(cellid)) AS geom
+   FROM trips;
