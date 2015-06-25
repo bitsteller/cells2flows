@@ -128,6 +128,7 @@ if __name__ == '__main__':
 	sql_remaining = "SELECT COUNT(DISTINCT trips.cellpath[1:2]) FROM trips WHERE array_length(trips.cellpath, 1) >= 2 AND NOT EXISTS(SELECT * FROM best_startpoint WHERE best_startpoint.part = trips.cellpath[1:2])"
 	mcur.execute(sql_remaining)
 	remaining = mcur.fetchone()[0]
+	print(str(remaining) + " startpoints to be calculated" )
 
 	startparts = fetch_parts("SELECT DISTINCT trips.cellpath[1:2] FROM trips WHERE array_length(trips.cellpath, 1) >= 2 AND NOT EXISTS(SELECT * FROM best_startpoint WHERE best_startpoint.part = trips.cellpath[1:2])")
 
@@ -141,6 +142,7 @@ if __name__ == '__main__':
 	sql_remaining = "SELECT COUNT(DISTINCT trips.cellpath[array_upper(trips.cellpath,1)-1:array_upper(trips.cellpath,1)]) FROM trips WHERE array_length(trips.cellpath, 1) >= 2 AND NOT EXISTS(SELECT * FROM best_endpoint WHERE best_endpoint.part = trips.cellpath[array_upper(trips.cellpath,1)-1:array_upper(trips.cellpath,1)])"
 	mcur.execute(sql_remaining)
 	remaining = mcur.fetchone()[0]
+	print(str(remaining) + " endpoints to be calculated" )
 
 	endparts = fetch_parts("SELECT DISTINCT trips.cellpath[array_upper(trips.cellpath,1)-1:array_upper(trips.cellpath,1)] FROM trips WHERE array_length(trips.cellpath, 1) >= 2 AND NOT EXISTS(SELECT * FROM best_endpoint WHERE best_endpoint.part = trips.cellpath[array_upper(trips.cellpath,1)-1:array_upper(trips.cellpath,1)])")
 
