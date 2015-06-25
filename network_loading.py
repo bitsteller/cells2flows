@@ -15,7 +15,6 @@ def calculate_flows(args):
 	"""Returns link flows generted by trips from cell origin to all other cells at a given hour"""
 	global hour, conn, cur
 	o, d = args #arguments are passed as tuple due to pool.map() limitations
-	start = time.time()
 
 	#fetch all OD flows from origin
 	result = []
@@ -25,15 +24,12 @@ def calculate_flows(args):
 				 WHERE cellpath_dist.orig_cell = od.orig_cell \
 				 AND cellpath_dist.dest_cell = od.dest_cell \
 				 AND od.interval = %(interval)s \
-				 AND cellpath_dist.orig_cell IN %(orig_cells)s \
-				 AND cellpath_dist.dest_cell IN %(dest_cells)s"
-
-	cur.execute(flows_sql, {"interval": hour, "orig_cells": tuple(o), "dest_cells": tuple(d)})
+				 AND cellpath_dist.orig_cell = ANY(%(orig_cells)s) \
+				 AND cellpath_dist.dest_cell = ANY(%(dest_cells)s)"
+	cur.execute(flows_sql, {"interval": hour, "orig_cells": o, "dest_cells": d})
 	for flow, links in cur.fetchall():
 		result.extend([(link, flow) for link in links])
 
-	end = time.time()
-	conn.close()
 	return result
 
 def add_flows(item):
@@ -77,7 +73,7 @@ if __name__ == '__main__':
 		print("Calculating link flows for interval " + str(interval) + " (" + str(i+1) + "/" + str(len(config.INTERVALS)) + ")...")
 
 		mapper = util.MapReduce(calculate_flows, add_flows, initializer = init) #add flows 
-		linkflows = mapper(util.od_chunks(chunksize = 3), length = len(config.CELLS)*len(config.CELLS)//2)
+		linkflows = mapper(util.od_chunks(chunksize = 3), length = len(config.CELLS)*len(config.CELLS)//3 + len(config.CELLS))
 
 		print("Uploading to database...")
 		f = StringIO.StringIO("\n".join(["%i\t%i\t%f" % (linkid, interval, flow) for linkid, flow in linkflows]))
