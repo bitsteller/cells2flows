@@ -80,8 +80,8 @@ def route_cost(xlat, xlon, ylat, ylon, zlat, zlon, attempts = 3):
 		data = json.load(urllib2.urlopen('http://www.server.com:5000/viaroute?loc=' + str(xlat) + ',' + str(xlon) + '&loc=' + str(ylat) + ',' + str(ylon) + '&loc=' + str(zlat) + ',' + str(zlon)))
 	except Exception, e:
 		print("WARNING: " + e.message)
-		if attemps > 0:
-			route_cost(xlat, xlon, ylat, ylon, zlat, zlon, attempts = attemps - 1)
+		if attempts > 0:
+			route_cost(xlat, xlon, ylat, ylon, zlat, zlon, attempts = attempts - 1)
 		else:
 			raise e
 
@@ -106,12 +106,10 @@ conn = None
 if __name__ == '__main__':
 	signal.signal(signal.SIGINT, signal_handler) #abort on CTRL-C
 	#connect to db
-	util.db_login()
-
-	extract_segments()
-
 	mconn = util.db_connect()
 	mcur = mconn.cursor()
+
+	extract_segments()
 
 	print("Creating waypoints table...")
 	mcur.execute(open("SQL/04_Routing_Network_Loading/create_waypoints.sql", 'r').read())
@@ -141,7 +139,7 @@ if __name__ == '__main__':
 
 		print("Calculating waypoints...")
 		mapper = util.ParMap(best_waypoint, initializer = init)
-		mapper(segmentss)
+		mapper(segments)
 		mapper.stop()
 		mapper = None
 		if request_stop:
