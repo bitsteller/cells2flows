@@ -13,13 +13,14 @@ def simplify(cell):
 
 	try:
 		cur.execute(open("SQL/02_Network_Simplification/simplify_step2.sql", 'r').read(), {"cell": cell})
+		conn.commit()
 	except psycopg2.IntegrityError, e:
+		conn.rollback()
 		if "duplicate key value" in e.pgerror:
 			simplify(cell) #try again
 		else:
 			raise e
-	finally:
-		conn.commit()
+
 
 def signal_handler(signal, frame):
 	global mapper, request_stop
@@ -41,7 +42,7 @@ if __name__ == '__main__':
 	conn = util.db_connect()
 	cur = conn.cursor()
 
-	print("Creating intersection table hh_2po_4pgr_vertices...")
+	print("Creating intersection table hh_2po_4pgr_vertices (takes a while)...")
 	cur.execute(open("SQL/02_Network_Simplification/create_hh_2po_4pgr_vertices.sql", 'r').read())
 	conn.commit()
 
