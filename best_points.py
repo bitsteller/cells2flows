@@ -85,7 +85,7 @@ def route_cost(xlat, xlon, ylat, ylon, attempts = 3):
 	try:
 		data = json.load(urllib2.urlopen('http://www.server.com:5000/viaroute?loc=' + str(xlat) + ',' + str(xlon) + '&loc=' + str(ylat) + ',' + str(ylon)))
 	except Exception, e:
-		print("WARNING: " + e.message)
+		print("WARNING: " + str(e))
 		if attempts > 0:
 			route_cost(xlat, xlon, ylat, ylon, attempts = attempts - 1)
 		else:
@@ -144,7 +144,7 @@ if __name__ == '__main__':
 	endparts = fetch_parts("SELECT DISTINCT trips.cellpath[array_upper(trips.cellpath,1)-1:array_upper(trips.cellpath,1)] FROM trips WHERE array_length(trips.cellpath, 1) >= 2 AND NOT EXISTS(SELECT * FROM best_endpoint WHERE best_endpoint.part = trips.cellpath[array_upper(trips.cellpath,1)-1:array_upper(trips.cellpath,1)])")
 
 	print("Calculating endpoints...")
-	direction = -1 #startpoints
+	direction = -1 #endpoints
 	mapper = util.ParMap(best_point, initializer = init)
 	mapper(endparts, length = remaining)
 	mapper.stop()

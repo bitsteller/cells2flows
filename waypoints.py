@@ -81,6 +81,7 @@ def route_cost(xlat, xlon, ylat, ylon, zlat, zlon, attempts = 3):
 	except Exception, e:
 		print("WARNING: " + e.message)
 		if attempts > 0:
+			time.sleep(5)
 			route_cost(xlat, xlon, ylat, ylon, zlat, zlon, attempts = attempts - 1)
 		else:
 			raise e
