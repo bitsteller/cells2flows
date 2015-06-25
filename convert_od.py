@@ -14,14 +14,15 @@ def fetch_taz_od_chunks():
 	Returns:
 		a generator returning lists containing row tuples (origin_taz, destination_taz, flow) fetched from the database
 	"""
-
-	cur2.execute("SELECT origin_taz, destination_taz, flow  \
+	global mconn, mcur
+	
+	mcur.execute("SELECT origin_taz, destination_taz, flow  \
 			 FROM taz_od \
 			 WHERE ((interval IS NULL AND %(interval)s IS NULL) OR interval = %(interval)s)",
 			 {"interval": interval})
 
 	batch = []
-	for o_taz, d_taz, flow in cur2:
+	for o_taz, d_taz, flow in mcur:
 		batch.append((o_taz, d_taz, flow))
 		if len(batch) == CHUNKSIZE:
 			yield batch
@@ -107,34 +108,28 @@ conn = None
 
 if __name__ == '__main__':
 	signal.signal(signal.SIGINT, signal_handler) #abort on CTRL-C
-	conn2 = util.db_connect()
-	cur2 = conn2.cursor()
+	mconn = util.db_connect()
+	mcur = mconn.cursor()
 
 	print("Creating od table...")
-	cur2.execute(open("SQL/01a_Preprocessing/create_od.sql", 'r').read())
-	conn2.commit()
+	mcur.execute(open("SQL/01a_Preprocessing/create_od.sql", 'r').read())
+	mconn.commit()
 
 	print("Creating taz_cell view mapping TAZ to cells...")
-	cur2.execute(open("SQL/01a_Preprocessing/create_get_cells_for_taz_func.sql", 'r').read())
-	conn2.commit()
+	mcur.execute(open("SQL/01a_Preprocessing/create_get_cells_for_taz_func.sql", 'r').read())
+	mconn.commit()
 
 	#fetch different interval values
 	for i, interval in enumerate(config.INTERVALS):
 		print("Converting TAZ OD flows to cell OD flows for interval " + str(interval) + " (" + str(i+1) + "/" + str(len(config.INTERVALS)) + ")...")
 
 		#count OD pairs in TAZ OD for given interval
-		cur2.execute("SELECT COUNT(*) \
+		mcur.execute("SELECT COUNT(*) \
 					 FROM taz_od \
 					 WHERE interval = %(interval)s",
 					 {"interval": interval})
-		count = cur2.fetchone()[0]
+		count = mcur.fetchone()[0]
 
 		#convert to cell flows
 		mapper = util.MapReduce(calculate_cell_od_flow, upload_cell_od_flow, initializer = init)
 		od_flows = mapper(fetch_taz_od_chunks(), length = count//CHUNKSIZE + 1, pipe = True, out = False, chunksize = 1)
-
-		#print("Uploading data to database...")
-		#f = StringIO.StringIO("\n".join(["%i\t%i\t%i\t%f" % (o_cell, d_cell, interval, flow) for (o_cell,d_cell), flow in od_flows]))
-
-		#cur.copy_from(f, 'network_loading', columns=('orig_cell', 'dest_cell' 'interval', 'flow'))
-		#conn.commit()

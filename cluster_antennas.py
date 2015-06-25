@@ -2,6 +2,11 @@ import psycopg2, signal, sys
 
 import util, config #local modules
 
+def init():
+	global conn, cur
+	conn = util.db_connect()
+	cur = conn.cursor()
+
 def connected_components(graph):
 	"""Returns the vertices in each connected compontent of a given graph
 	Args:
@@ -32,10 +37,8 @@ def join_cells(args):
 		args: A tuple (newid, cellids) where newid is the new cellid of 
 			  the clustered antenna and cellids a list of antenna ids from ant_pos_original to be clustered
 	"""
+	global conn, cur
 	newid, cellids = args
-
-	conn = util.db_connect()
-	cur = conn.cursor()
 
 	#add new cell at centroid of the cluster
 	cur.execute("WITH clustered_antennas AS (SELECT ST_Union(ant_pos_original.geom) AS geom FROM ant_pos_original WHERE ant_pos_original.id IN %(cluster)s) \
@@ -48,8 +51,7 @@ def join_cells(args):
 	conn.commit()
 
 def update_trip(tripid):
-	conn = util.db_connect()
-	cur = conn.cursor()
+	global conn, cur
 
 	#fetch cellpath
 	cur.execute("SELECT cellpath FROM trips_original WHERE id = %s", (tripid,))
@@ -72,27 +74,30 @@ def update_trip(tripid):
 
 def signal_handler(signal, frame):
 	global mapper, request_stop
+	request_stop = True
 	if mapper:
 		mapper.stop()
-	request_stop = True
 	print("Aborting (can take a minute)...")
+	sys.exit(1)
 
 request_stop = False
 mapper = None
+cur = None
+conn = None
 
 if __name__ == '__main__':
 	signal.signal(signal.SIGINT, signal_handler) #abort on CTRL-C
 	util.db_login()
-	conn = util.db_connect()
-	cur = conn.cursor()
+	mconn = util.db_connect()
+	mcur = conn.cursor()
 
 	print("Recreating ant_pos table...")
-	cur.execute(open("SQL/01_Loading/create_ant_pos.sql", 'r').read())
-	conn.commit()
+	mcur.execute(open("SQL/01_Loading/create_ant_pos.sql", 'r').read())
+	mconn.commit()
 
 	print("Recreating trips table...")
-	cur.execute(open("SQL/01_Loading/create_trips.sql", 'r').read())
-	conn.commit()
+	mcur.execute(open("SQL/01_Loading/create_trips.sql", 'r').read())
+	mconn.commit()
 
 	print("Fetching antennas to join by distance from database...") #All antennas closer than config.MIN_ANTENNA_DIST will be merged
 	sql = '''
@@ -104,8 +109,8 @@ if __name__ == '__main__':
 		)
 	FROM ant_pos_original AS w;
 	'''
-	cur.execute(sql, {'min_dist': config.MIN_ANTENNA_DIST})
-	graph = {node: edges for node, edges in cur}
+	mcur.execute(sql, {'min_dist': config.MIN_ANTENNA_DIST})
+	graph = {node: edges for node, edges in mcur}
 
 	print("Clustering...")
 	components = connected_components(graph)
@@ -116,9 +121,9 @@ if __name__ == '__main__':
 			newcells[oldid] = newid
 
 	print("Updateting antennas...")
-	mapper = util.ParMap(join_cells, num_workers = 1) #not parallizable due to necessary write access to cellpath arrays, ParMap just for status indicator
+	mapper = util.ParMap(join_cells, num_workers = 1, initializer = init) #not parallizable due to necessary write access to cellpath arrays, ParMap just for status indicator
 	mapper(enumerate(components), chunksize = 5, length = len(components))
 
 	print("Updateting trips...")
 	mapper = util.ParMap(update_trip) #not parallizable due to necessary write access to cellpath arrays, ParMap just for status indicator
-	mapper(config.TRIPS, chunksize = 1000)
+	mapper(config.TRIPS, chunksize = 1000, initializer = init)

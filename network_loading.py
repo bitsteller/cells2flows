@@ -6,15 +6,16 @@ import numpy #for vector/matrix computations
 
 import util, config #local modules
 
+def init():
+	global conn, cur
+	conn = util.db_connect()
+	cur = conn.cursor()
 
 def calculate_flows(args):
 	"""Returns link flows generted by trips from cell origin to all other cells at a given hour"""
-	global hour
+	global hour, conn, cur
 	o, d = args #arguments are passed as tuple due to pool.map() limitations
 	start = time.time()
-
-	conn = util.db_connect()
-	cur = conn.cursor()
 
 	#fetch all OD flows from origin
 	result = []
@@ -50,21 +51,23 @@ def signal_handler(signal, frame):
 request_stop = False
 mapper = None
 hour = None
+cur = None
+conn = None
 
 if __name__ == '__main__':
 	signal.signal(signal.SIGINT, signal_handler) #abort on CTRL-C
 	#connect to db
 	util.db_login()
-	conn = util.db_connect()
-	cur = conn.cursor()
+	mconn = util.db_connect()
+	mcur = mconn.cursor()
 
 	print("Creating network_loading table and loaded_links view...")
-	cur.execute(open("SQL/04_Routing_Network_Loading/create_network_loading.sql", 'r').read())
-	conn.commit()
+	mcur.execute(open("SQL/04_Routing_Network_Loading/create_network_loading.sql", 'r').read())
+	mconn.commit()
 
 	print("Creating route functions...")
-	cur.execute(open("SQL/04_Routing_Network_Loading/create_route_functions.sql", 'r').read())
-	conn.commit()
+	mcur.execute(open("SQL/04_Routing_Network_Loading/create_route_functions.sql", 'r').read())
+	mconn.commit()
 
 	#fetch different interval values
 	for i, interval in enumerate(config.INTERVALS):
@@ -73,11 +76,11 @@ if __name__ == '__main__':
 			break
 		print("Calculating link flows for interval " + str(interval) + " (" + str(i+1) + "/" + str(len(config.INTERVALS)) + ")...")
 
-		mapper = util.MapReduce(calculate_flows, add_flows) #add flows 
+		mapper = util.MapReduce(calculate_flows, add_flows, initializer = init) #add flows 
 		linkflows = mapper(util.od_chunks(chunksize = 3), length = len(config.CELLS)*len(config.CELLS)//2)
 
 		print("Uploading to database...")
 		f = StringIO.StringIO("\n".join(["%i\t%i\t%f" % (linkid, interval, flow) for linkid, flow in linkflows]))
 
-		cur.copy_from(f, 'network_loading', columns=('id', 'interval', 'flow'), null = "NULL")
-		conn.commit()
+		mcur.copy_from(f, 'network_loading', columns=('id', 'interval', 'flow'), null = "NULL")
+		mconn.commit()
