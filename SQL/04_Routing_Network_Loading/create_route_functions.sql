@@ -37,32 +37,18 @@ $BODY$
 -- best_startpoint(cellpath) where cellpath is a list of travelled cells
 -- calculates the best starting point (hh_2po_4pgr_vertices.id) in the first cell in the path when heading to the second cell
 CREATE OR REPLACE FUNCTION best_startpoint(integer[]) RETURNS int AS $$
-WITH possible_waypoints AS (    SELECT * 
-                FROM boundary_junctions 
-                WHERE antenna_id = $1[1] 
-                ORDER BY ST_DISTANCE((SELECT geom FROM hh_2po_4pgr_vertices AS node WHERE node.id = closest_junction($1[1], $1[2])), (SELECT geom FROM hh_2po_4pgr_vertices AS node WHERE node.id = boundary_junctions.junction_id))
-                LIMIT 5
-                )
-SELECT waypoint.junction_id
-FROM possible_waypoints waypoint, route_with_waypoints(ARRAY [waypoint.junction_id, closest_junction($1[1], $1[2])]) route
-ORDER BY route.cost
-LIMIT 1
+SELECT startpoint
+FROM best_startpoint
+WHERE part = $1[1:2]
 $$ LANGUAGE SQL STABLE;
 
 
 -- best_endpoint(cellpath) where cellpath is a list of travelled cells
 -- calculates the best starting point (hh_2po_4pgr_vertices.id) in the last cell of the path when coming from the second last cell
 CREATE OR REPLACE FUNCTION best_endpoint(integer[]) RETURNS int AS $$
-WITH possible_waypoints AS (    SELECT * 
-                FROM boundary_junctions 
-                WHERE antenna_id = $1[array_length($1, 1)]
-                ORDER BY ST_DISTANCE((SELECT geom FROM hh_2po_4pgr_vertices AS node WHERE node.id = closest_junction($1[array_length($1, 1)], $1[array_length($1, 1)-1])), (SELECT geom FROM hh_2po_4pgr_vertices AS node WHERE node.id = boundary_junctions.junction_id))
-                LIMIT 5
-                )
-SELECT waypoint.junction_id
-FROM possible_waypoints waypoint, route_with_waypoints(ARRAY [closest_junction($1[array_length($1, 1)], $1[array_length($1, 1)-1]), waypoint.junction_id]) route
-ORDER BY route.cost
-LIMIT 1
+SELECT startpoint
+FROM best_endpoint
+WHERE part = $1[array_upper($1,1)-1:array_upper($1,1)]
 $$ LANGUAGE SQL STABLE;
 
 -- get_waypoints(cellpath) returns an array of waypoints for the given cellpath by lookup in the waypoints table
