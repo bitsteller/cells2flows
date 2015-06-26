@@ -46,7 +46,7 @@ $$ LANGUAGE SQL STABLE;
 -- best_endpoint(cellpath) where cellpath is a list of travelled cells
 -- calculates the best starting point (hh_2po_4pgr_vertices.id) in the last cell of the path when coming from the second last cell
 CREATE OR REPLACE FUNCTION best_endpoint(integer[]) RETURNS int AS $$
-SELECT startpoint
+SELECT endpoint
 FROM best_endpoint
 WHERE part = $1[array_upper($1,1)-1:array_upper($1,1)]
 $$ LANGUAGE SQL STABLE;

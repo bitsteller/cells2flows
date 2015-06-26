@@ -18,6 +18,7 @@ def calculate_flows(args):
 
 	#fetch all OD flows from origin
 	result = []
+	#t = util.Timer("DB")
 	flows_sql = "SELECT cellpath_dist.share * od.flow AS flow, \
 						(route_with_waypoints(array_append(array_prepend(best_startpoint(cellpath_dist.cellpath), get_waypoints(cellpath_dist.cellpath)), best_endpoint(cellpath_dist.cellpath)))).edges AS links \
 				 FROM cellpath_dist, od\
@@ -27,6 +28,7 @@ def calculate_flows(args):
 				 AND cellpath_dist.orig_cell = ANY(%(orig_cells)s) \
 				 AND cellpath_dist.dest_cell = ANY(%(dest_cells)s)"
 	cur.execute(flows_sql, {"interval": hour, "orig_cells": o, "dest_cells": d})
+	#t.stop()
 	for flow, links in cur.fetchall():
 		result.extend([(link, flow) for link in links])
 
@@ -73,7 +75,7 @@ if __name__ == '__main__':
 		print("Calculating link flows for interval " + str(interval) + " (" + str(i+1) + "/" + str(len(config.INTERVALS)) + ")...")
 
 		mapper = util.MapReduce(calculate_flows, add_flows, initializer = init) #add flows 
-		linkflows = mapper(util.od_chunks(chunksize = 3), length = len(config.CELLS)*len(config.CELLS)//3 + len(config.CELLS))
+		linkflows = mapper(util.od_chunks(chunksize = 3), length = len(config.CELLS)*len(config.CELLS)//3 + len(config.CELLS), chunksize = 3)
 
 		print("Uploading to database...")
 		f = StringIO.StringIO("\n".join(["%i\t%i\t%f" % (linkid, interval, flow) for linkid, flow in linkflows]))
