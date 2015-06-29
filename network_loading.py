@@ -19,15 +19,18 @@ def calculate_flows(args):
 	#fetch all OD flows from origin
 	result = []
 	#t = util.Timer("DB")
-	flows_sql = "SELECT cellpath_dist.share * od.flow AS flow, \
+	flows_sql = "WITH ranked_cellpath AS(\
+					SELECT cellpath_dist.*, ROW_NUMBER() OVER(PARTITION BY (cellpath_dist.orig_cell,cellpath_dist.dest_cell) ORDER BY cellpath_dist.share DESC) AS rank\
+					FROM cellpath_dist \
+					WHERE cellpath_dist.orig_cell = ANY(%(orig_cells)s) \
+				 		AND cellpath_dist.dest_cell = ANY(%(dest_cells)s)) \
+				 SELECT cellpath_dist.share * od.flow AS flow, \
 						(route_with_waypoints(array_append(array_prepend(best_startpoint(cellpath_dist.cellpath), get_waypoints(cellpath_dist.cellpath)), best_endpoint(cellpath_dist.cellpath)))).edges AS links \
-				 FROM cellpath_dist, od\
+				 FROM (SELECT orig_cell, dest_cell, cellpath, share FROM ranked_cellpath WHERE rank <= %(max_cellpaths)s) AS cellpath_dist, od\
 				 WHERE cellpath_dist.orig_cell = od.orig_cell \
 				 AND cellpath_dist.dest_cell = od.dest_cell \
-				 AND od.interval = %(interval)s \
-				 AND cellpath_dist.orig_cell = ANY(%(orig_cells)s) \
-				 AND cellpath_dist.dest_cell = ANY(%(dest_cells)s)"
-	cur.execute(flows_sql, {"interval": hour, "orig_cells": o, "dest_cells": d})
+				 AND od.interval = %(interval)s"
+	cur.execute(flows_sql, {"interval": hour, "orig_cells": o, "dest_cells": d, "max_cellpaths": config.MAX_CELLPATHS})
 	#t.stop()
 	for flow, links in cur.fetchall():
 		result.extend([(link, flow) for link in links])
