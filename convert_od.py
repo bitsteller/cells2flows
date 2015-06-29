@@ -58,17 +58,27 @@ def calculate_cell_od_flow(taz_od_chunk):
 			if taz_id == d_taz:
 				d_cells.append((cell_id, share))
 
-		#distribute flow on cells by area
+		#find best matching cell pairs by area
 		od_pairs = []
-		shares = []
 		for o_cell, o_share in o_cells:
 			for d_cell, d_share in d_cells:
-				if o_share * d_share > 0.1:
-					od_pairs.append((o_cell, d_cell))
-					shares.append(o_share * d_share)
+				od_pairs.append((o_cell, d_cell, o_share*d_share))
 
-		normalized_shares = [share/sum(shares) for share in shares]
-		result.extend([((o_cell, d_cell), share * flow) for (o_cell, d_cell), share in zip(od_pairs, normalized_shares)])
+		od_pairs = sorted(od_pairs, key=lambda od_pair: od_pair[2])
+		top_od_pairs = []
+		for i in range(len(od_pairs)):
+			o_cell, d_cell, combined_share = od_pairs[i]
+			if combined_share == 1.0: #keep all fully covered cell pairs
+				top_od_pairs.append((o_cell, d_cell, combined_share))
+			elif i < 5: #if less than 5 fully covered cell pairs: kepp additionally up to 5 cell pairs that are not fully covered
+				top_od_pairs.append((o_cell, d_cell, combined_share))
+
+		if len(top_od_pairs) == 0:
+			print("WARNING: Flow of " + str(flow) + " was lost, because no cellpair could be found for TAZ pair (" + str(o_taz), "," + str(d_taz) + ")!")
+		#allocate flow to the discovered cell pairs
+		share_sum = sum([combined_share for o_cell, d_cell, combined_share in top_od_pairs])
+		normalized_shares = [(o_cell, d_cell, share/share_sum) for o_cell, d_cell, share in top_od_pairs]
+		result.extend([((o_cell, d_cell), share * flow) for o_cell, d_cell, share in normalized_shares])
 	return result
 
 def upload_cell_od_flow(args):
@@ -132,4 +142,6 @@ if __name__ == '__main__':
 
 		#convert to cell flows
 		mapper = util.MapReduce(calculate_cell_od_flow, upload_cell_od_flow, initializer = init)
-		od_flows = mapper(fetch_taz_od_chunks(), length = count//CHUNKSIZE + 1, pipe = True, out = False, chunksize = 1)
+		mapper(fetch_taz_od_chunks(), length = count//CHUNKSIZE + 1, pipe = True, out = False, chunksize = 1)
+		#init()
+		#map(calculate_cell_od_flow, fetch_taz_od_chunks())
