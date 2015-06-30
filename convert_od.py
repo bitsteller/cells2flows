@@ -70,13 +70,14 @@ def calculate_cell_od_flow(taz_od_chunk):
 		top_od_pairs = []
 		for i in range(len(od_pairs)):
 			o_cell, d_cell, combined_share = od_pairs[i]
-			if combined_share == 1.0: #keep all fully covered cell pairs
+			if combined_share >= 0.8: #keep all almost fully covered cell pairs
 				top_od_pairs.append((o_cell, d_cell, combined_share))
 			elif i < 5: #if less than 5 fully covered cell pairs: kepp additionally up to 5 cell pairs that are not fully covered
 				top_od_pairs.append((o_cell, d_cell, combined_share))
 
 		if len(top_od_pairs) == 0:
 			print("WARNING: Flow of " + str(flow) + " was lost, because no cellpair could be found for TAZ pair (" + str(o_taz), "," + str(d_taz) + ")!")
+		
 		#allocate flow to the discovered cell pairs
 		share_sum = sum([combined_share for o_cell, d_cell, combined_share in top_od_pairs])
 		normalized_shares = [(o_cell, d_cell, share/share_sum) for o_cell, d_cell, share in top_od_pairs]
@@ -145,5 +146,3 @@ if __name__ == '__main__':
 		#convert to cell flows
 		mapper = util.MapReduce(calculate_cell_od_flow, upload_cell_od_flow, initializer = init)
 		mapper(fetch_taz_od_chunks(), length = count//CHUNKSIZE + 1, pipe = True, out = False, chunksize = 1)
-		#init()
-		#map(calculate_cell_od_flow, fetch_taz_od_chunks())
