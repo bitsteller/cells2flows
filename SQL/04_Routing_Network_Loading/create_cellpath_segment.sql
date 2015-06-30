@@ -1,31 +1,3 @@
---creates a view containing simplified cellpaths
-DROP MATERIALIZED VIEW IF EXISTS simple_cellpath CASCADE;
-
-CREATE MATERIALIZED VIEW simple_cellpath AS 
-  WITH cellpath_geom AS
-  (WITH cellpaths AS (SELECT DISTINCT cellpath FROM trips)
-  SELECT cellpaths.cellpath,
-      ( SELECT st_makeline(( SELECT ant_pos.geom
-                     FROM ant_pos
-                    WHERE ant_pos.id = cellid.cellid)) AS st_makeline
-             FROM unnest(cellpaths.cellpath) cellid(cellid)) AS geom,
-     ( SELECT st_simplify(st_makeline(( SELECT ant_pos.geom
-             FROM ant_pos
-            WHERE ant_pos.id = cellid.cellid)),0.05) AS st_simplify
-     FROM unnest(cellpaths.cellpath) cellid(cellid)) AS simple_geom
-     FROM cellpaths)
-  SELECT  cellpath_geom.cellpath, 
-      array_agg((SELECT ant_pos.id FROM ant_pos WHERE ant_pos.geom = simplified.geom)) AS simple_cellpath
-  FROM cellpath_geom, ST_DumpPoints(cellpath_geom.simple_geom) simplified
-  GROUP BY cellpath_geom.cellpath
-WITH DATA;
-
-CREATE INDEX idx_simple_cellpath_cellpath
-  ON public.simple_cellpath
-  USING btree
-  (cellpath);
-
-
 --_assignCellpathSegmentids(cellpath) assigns segment ids to each cell in the cellpath based on the simplified cellpath
 CREATE OR REPLACE FUNCTION _assignCellpathSegmentIds(integer[]) RETURNS TABLE(segment_id integer, cellid integer) AS
 $BODY$
@@ -66,3 +38,18 @@ $$ LANGUAGE SQL STABLE;
 --Testing:
 --SELECT * FROM _assignCellpathSegmentIds(ARRAY[63,60,61,62,222,361,358,223,359,225,230,356,381,351,362,349,362,33,28,350,27,388,0,23,22,17,302,295,303,297,306])
 --SELECT * FROM getCellpathSegments(ARRAY[63,60,61,62,222,361,358,223,359,225,230,356,381,351,362,349,362,33,28,350,27,388,0,23,22,17,302,295,303,297,306])
+
+--view containing all segments for each cellpath
+DROP MATERIALIZED VIEW IF EXISTS public.cellpath_segment;
+
+CREATE MATERIALIZED VIEW public.cellpath_segment AS
+  SELECT simple_cellpath, segments.segment_id, segments.segment 
+  FROM simple_cellpath, getCellpathSegments(simple_cellpath.cellpath) AS segments 
+  ORDER BY simple_cellpath.cellpath, segment_id
+WITH DATA;
+
+COMMENT ON MATERIALIZED VIEW public.cellpath_segment IS 
+'Contains a partition into segments for each cellpath. 
+For each cellpath the table contains segments of the cellpath enumerated with a ascending segment id.
+Concatenating all segments yields the original cellpath. 
+Splitting into segments is done using line simplfiication of the original cellpath.';

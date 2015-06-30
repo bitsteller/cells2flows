@@ -16,6 +16,7 @@ steps = [
 			("Calculate Voronoi diagram", "voronoi.py"),
 			("Simplify road network", "simplify_network.py"),
 			("Convert OD matrix to cell matrix", "convert_od.py"),
+			("Segmentize cellpaths (for lazy Voronoi routing)", "segmentize_cellpaths.py"),
 			("Calculate start/endpoints", "best_points.py"),
 			("Calculate waypoints", "waypoints.py"),
 			("Calculate cellpath distribution", "cellpath_dist.py"),
