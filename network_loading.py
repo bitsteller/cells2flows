@@ -18,19 +18,19 @@ def calculate_flows(args):
 
 	#fetch all OD flows from origin
 	result = []
+	data = {"interval": hour, "orig_cells": o, "dest_cells": d, "max_cellpaths": config.MAX_CELLPATHS}
 
-	flows_sql = "WITH ranked_cellpath AS(\
-					SELECT cellpath_dist.*, ROW_NUMBER() OVER(PARTITION BY (cellpath_dist.orig_cell,cellpath_dist.dest_cell) ORDER BY cellpath_dist.share DESC) AS rank\
-					FROM cellpath_dist \
-					WHERE cellpath_dist.orig_cell = ANY(%(orig_cells)s) \
-				 		AND cellpath_dist.dest_cell = ANY(%(dest_cells)s)) \
-				 SELECT cellpath_dist.share * od.flow AS flow, \
-						(route_with_waypoints(array_append(array_prepend(best_startpoint(cellpath_dist.cellpath), get_waypoints(cellpath_dist.cellpath)), best_endpoint(cellpath_dist.cellpath)))).edges AS links \
-				 FROM (SELECT orig_cell, dest_cell, cellpath, share FROM ranked_cellpath WHERE rank <= %(max_cellpaths)s) AS cellpath_dist, od\
-				 WHERE cellpath_dist.orig_cell = od.orig_cell \
-				 AND cellpath_dist.dest_cell = od.dest_cell \
-				 AND od.interval = %(interval)s"
-	cur.execute(flows_sql, {"interval": hour, "orig_cells": o, "dest_cells": d, "max_cellpaths": config.MAX_CELLPATHS})
+	flows_sql = ""
+	if config.ROUTE_ALGORITHM.lower() == "strict":
+		flows_sql = open("SQL/04_Routing_Network_Loading/algorithms/STRICT.sql", 'r').read()
+	else if config.ROUTE_ALGORITHM.lower() == "lazy":
+		flows_sql = open("SQL/04_Routing_Network_Loading/algorithms/LAZY.sql", 'r').read()
+	else if config.ROUTE_ALGORITHM.lower() == "shortest":
+		flows_sql = open("SQL/04_Routing_Network_Loading/algorithms/SHORTEST.sql", 'r').read()
+	else:
+		raise ValueError("ROUTE_ALGORITHM is invalid")
+
+	cur.execute(flows_sql, data)
 
 	for flow, links in cur.fetchall():
 		result.extend([(link, flow) for link in links])
