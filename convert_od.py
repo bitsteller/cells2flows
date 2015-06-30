@@ -65,6 +65,8 @@ def calculate_cell_od_flow(taz_od_chunk):
 				od_pairs.append((o_cell, d_cell, o_share*d_share))
 
 		od_pairs = sorted(od_pairs, key=lambda od_pair: od_pair[2])
+		od_pairs.reverse() #sort descending by share
+
 		top_od_pairs = []
 		for i in range(len(od_pairs)):
 			o_cell, d_cell, combined_share = od_pairs[i]
