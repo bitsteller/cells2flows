@@ -32,3 +32,16 @@ CREATE INDEX idx_taz_od_interval
   ON public.taz_od
   USING btree
   (interval);
+
+-- debug view for vizualizing taz_od flows in GIS tools
+CREATE OR REPLACE VIEW taz_od_geom AS
+ SELECT row_number() OVER () AS id,
+    taz_od.origin_taz,
+    taz_od.destination_taz,
+    taz_od."interval",
+    taz_od.flow,
+    st_makeline(ST_Centroid(o.geom), ST_Centroid(d.geom)) AS geom
+   FROM taz_od,
+    taz o,
+    taz d
+  WHERE taz_od.origin_taz = o.taz_id AND taz_od.destination_taz = d.taz_id AND o.taz_id <> d.taz_id;

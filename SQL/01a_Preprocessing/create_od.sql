@@ -32,3 +32,16 @@ CREATE INDEX idx_od_interval
   ON public.od
   USING btree
   (interval);
+
+--debug view for viewing OD flows in GIS tools
+CREATE OR REPLACE VIEW od_geom AS 
+ SELECT row_number() OVER () AS id,
+    od.orig_cell,
+    od.dest_cell,
+    od."interval",
+    od.flow,
+    st_makeline(o.geom, d.geom) AS geom
+   FROM od,
+    ant_pos o,
+    ant_pos d
+  WHERE od.orig_cell = o.id AND od.dest_cell = d.id AND o.id <> d.id;
