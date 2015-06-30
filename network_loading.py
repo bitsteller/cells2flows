@@ -18,7 +18,7 @@ def calculate_flows(args):
 
 	#fetch all OD flows from origin
 	result = []
-	#t = util.Timer("DB")
+
 	flows_sql = "WITH ranked_cellpath AS(\
 					SELECT cellpath_dist.*, ROW_NUMBER() OVER(PARTITION BY (cellpath_dist.orig_cell,cellpath_dist.dest_cell) ORDER BY cellpath_dist.share DESC) AS rank\
 					FROM cellpath_dist \
@@ -31,7 +31,7 @@ def calculate_flows(args):
 				 AND cellpath_dist.dest_cell = od.dest_cell \
 				 AND od.interval = %(interval)s"
 	cur.execute(flows_sql, {"interval": hour, "orig_cells": o, "dest_cells": d, "max_cellpaths": config.MAX_CELLPATHS})
-	#t.stop()
+
 	for flow, links in cur.fetchall():
 		result.extend([(link, flow) for link in links])
 
