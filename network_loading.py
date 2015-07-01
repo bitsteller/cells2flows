@@ -1,4 +1,4 @@
-import time, signal, json, random, itertools, math, sys, StringIO
+import time, signal, json, random, itertools, math, sys, StringIO, os.path
 from multiprocessing import Pool, Manager
 import urllib2 #for OSRM queries
 import psycopg2 #for postgres DB access
@@ -13,22 +13,12 @@ def init():
 
 def calculate_flows(args):
 	"""Returns link flows generted by trips from cell origin to all other cells at a given hour"""
-	global hour, conn, cur
+	global hour, conn, cur, flows_sql
 	o, d = args #arguments are passed as tuple due to pool.map() limitations
 
 	#fetch all OD flows from origin
 	result = []
 	data = {"interval": hour, "orig_cells": o, "dest_cells": d, "max_cellpaths": config.MAX_CELLPATHS}
-
-	flows_sql = ""
-	if config.ROUTE_ALGORITHM.lower() == "strict":
-		flows_sql = open("SQL/04_Routing_Network_Loading/algorithms/STRICT.sql", 'r').read()
-	else if config.ROUTE_ALGORITHM.lower() == "lazy":
-		flows_sql = open("SQL/04_Routing_Network_Loading/algorithms/LAZY.sql", 'r').read()
-	else if config.ROUTE_ALGORITHM.lower() == "shortest":
-		flows_sql = open("SQL/04_Routing_Network_Loading/algorithms/SHORTEST.sql", 'r').read()
-	else:
-		raise ValueError("ROUTE_ALGORITHM is invalid")
 
 	cur.execute(flows_sql, data)
 
@@ -54,6 +44,7 @@ mapper = None
 hour = None
 cur = None
 conn = None
+flows_sql = ""
 
 if __name__ == '__main__':
 	signal.signal(signal.SIGINT, signal_handler) #abort on CTRL-C
@@ -69,6 +60,13 @@ if __name__ == '__main__':
 	print("Creating route functions...")
 	mcur.execute(open("SQL/04_Routing_Network_Loading/create_route_functions.sql", 'r').read())
 	mconn.commit()
+
+	print("Initializing algorithm " + config.ROUTE_ALGORITHM + "...")
+	init_sql_filename = "SQL/04_Routing_Network_Loading/algorithms/" + config.ROUTE_ALGORITHM.upper() + "/init.sql"
+	if os.path.exists(init_sql_filename):
+		mcur.execute(open(init_sql_filename, 'r').read())
+		mcur.commit()
+	flows_sql = open("SQL/04_Routing_Network_Loading/algorithms/" + config.ROUTE_ALGORITHM.upper() + "/flows.sql", 'r').read()
 
 	#fetch different interval values
 	for i, interval in enumerate(config.INTERVALS):
