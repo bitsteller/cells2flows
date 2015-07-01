@@ -43,7 +43,7 @@ $$ LANGUAGE SQL STABLE;
 DROP MATERIALIZED VIEW IF EXISTS public.cellpath_segment;
 
 CREATE MATERIALIZED VIEW public.cellpath_segment AS
-  SELECT simple_cellpath, segments.segment_id, segments.segment 
+  SELECT simple_cellpath.cellpath, segments.segment_id, segments.segment 
   FROM simple_cellpath, getCellpathSegments(simple_cellpath.cellpath) AS segments 
   ORDER BY simple_cellpath.cellpath, segment_id
 WITH DATA;

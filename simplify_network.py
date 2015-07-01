@@ -21,7 +21,6 @@ def simplify(cell):
 		else:
 			raise e
 
-
 def signal_handler(signal, frame):
 	global mapper, request_stop
 	request_stop = True
