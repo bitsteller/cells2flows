@@ -46,7 +46,7 @@ $$ LANGUAGE SQL STABLE;
 DROP MATERIALIZED VIEW IF EXISTS public.cellpath_segment;
 
 CREATE MATERIALIZED VIEW public.cellpath_segment AS
-  SELECT simple_cellpath.cellpath, segments.segment_id, segments.segment 
+  SELECT simple_cellpath.cellpath AS cellpath, segments.segment_id, segments.segment 
   FROM simple_cellpath, getCellpathSegments(simple_cellpath.cellpath) AS segments 
   ORDER BY simple_cellpath.cellpath, segment_id
 WITH DATA;
@@ -57,11 +57,11 @@ For each cellpath the table contains segments of the cellpath enumerated with a 
 Concatenating all segments yields the original cellpath. 
 Splitting into segments is done using line simplfiication of the original cellpath.';
 
-COMMENT ON MATERIALIZED VIEW public.cellpath_segment.cellpath IS
+COMMENT ON COLUMN public.cellpath_segment.cellpath IS
 'original cellpath (array of cellids)';
 
-COMMENT ON MATERIALIZED VIEW public.cellpath_segment.segment_id IS
+COMMENT ON COLUMN public.cellpath_segment.segment_id IS
 'the id of the segment (starting at 0)';
 
-COMMENT ON MATERIALIZED VIEW public.cellpath_segment.segment IS
+COMMENT ON COLUMN public.cellpath_segment.segment IS
 'the cellpath segment (array of cellids)';
