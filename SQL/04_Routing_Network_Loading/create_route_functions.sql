@@ -69,3 +69,23 @@ $$ LANGUAGE SQL STABLE;
 --    (route_with_waypoints(array_append(array_prepend(best_startpoint(trips.cellpath), get_waypoints(trips.cellpath)),best_endpoint(trips.cellpath)))).edges AS links
 --FROM trips_cellpath AS trips
 --LIMIT 10
+
+
+-- getTopCellpaths(orig_cellid, dest_cellid, n) fetches the top n (most likeley) cellpaths from orig_cellid to dest_cellid
+-- the result is returned as a table containg the top n cellpath and their share (likelihood)
+-- shares are normalized to sum up to 1.0 in the resulting table
+CREATE OR REPLACE FUNCTION getTopCellpaths(integer, integer, integer) RETURNS table(cellpath int[], share double precision) AS $$
+    WITH ranked_cellpath AS (
+        SELECT cellpath_dist.cellpath AS cellpath, cellpath_dist.share
+        FROM cellpath_dist
+        WHERE cellpath_dist.orig_cell = $1
+            AND cellpath_dist.dest_cell = $2
+        ORDER BY cellpath_dist.share DESC
+        LIMIT $3
+        )
+    SELECT cellpath, share/(SELECT SUM(share) FROM ranked_cellpath)  FROM ranked_cellpath
+$$ LANGUAGE SQL STABLE;
+
+
+--SELECT * FROM getTopCellpaths(1,4,5)
+
