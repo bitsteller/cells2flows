@@ -5,7 +5,7 @@ $BODY$
     simplified integer[];
     BEGIN
     simplified := (SELECT simple_cellpath FROM simple_cellpath WHERE simple_cellpath.cellpath = $1);
-    segment_id := 0;
+    segment_id := -1;
     FOR i IN 1 .. array_length($1,1) LOOP
       cellid := $1[i];
     IF $1[i] = simplified[segment_id+1] AND i < array_length($1,1) THEN
@@ -15,6 +15,9 @@ $BODY$
       segment_id := segment_id + 1;
       RETURN NEXT;
     ELSE
+      IF i = 1 THEN
+        segment_id := segment_id + 1;
+      END IF;
       RETURN NEXT;
     END IF;
     END LOOP;
