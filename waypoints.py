@@ -82,7 +82,7 @@ def route_cost(xlat, xlon, ylat, ylon, zlat, zlon, attempts = 3):
 		print("WARNING: " + e.message)
 		if attempts > 0:
 			time.sleep(5)
-			route_cost(xlat, xlon, ylat, ylon, zlat, zlon, attempts = attempts - 1)
+			return route_cost(xlat, xlon, ylat, ylon, zlat, zlon, attempts = attempts - 1)
 		else:
 			raise e
 
