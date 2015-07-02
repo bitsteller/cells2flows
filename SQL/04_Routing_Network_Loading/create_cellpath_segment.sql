@@ -53,3 +53,12 @@ COMMENT ON MATERIALIZED VIEW public.cellpath_segment IS
 For each cellpath the table contains segments of the cellpath enumerated with a ascending segment id.
 Concatenating all segments yields the original cellpath. 
 Splitting into segments is done using line simplfiication of the original cellpath.';
+
+COMMENT ON MATERIALIZED VIEW public.cellpath_segment.cellpath IS
+'original cellpath (array of cellids)'
+
+COMMENT ON MATERIALIZED VIEW public.cellpath_segment.segment_id IS
+'the id of the segment (starting at 0)'
+
+COMMENT ON MATERIALIZED VIEW public.cellpath_segment.segment IS
+'the cellpath segment (array of cellids)'
