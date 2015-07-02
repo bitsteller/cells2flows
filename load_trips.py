@@ -6,6 +6,11 @@ import matplotlib.pyplot as plt
 
 import util, config #local modules
 
+def init():
+	global conn, cur
+	conn = util.db_connect()
+	cur = conn.cursor()
+
 def read_trip(args):
 	"""Parses a line of a trip csv
 	Args:
@@ -28,11 +33,11 @@ def upload_trip(args):
 		args: a tuple ((user_id, cellpath), values), where values is a list that is ignored and the other variables 
 		are the attributes of the trip
 	"""
+	global conn, cur
 
 	user_id, cellpathlist = args
 	cellpath = cellpathlist[0]
-	conn = util.db_connect()
-	cur = conn.cursor()
+
 	sql = "	INSERT INTO trips (user_id, start_antenna, end_antenna, cellpath) \
 			VALUES (%s, %s, %s, %s);"
 	cur.execute(sql, (user_id, cellpath[0], cellpath[-1], cellpath))
@@ -54,13 +59,12 @@ mapper = None
 if __name__ == '__main__':
 	signal.signal(signal.SIGINT, signal_handler) #abort on CTRL-C
 	#connect to db
-	util.db_login()
-	conn = util.db_connect()
-	cur = conn.cursor()
+	mconn = util.db_connect()
+	mcur = mconn.cursor()
 
 	print("Creating trips table...")
-	cur.execute(open("SQL/01_Loading/create_trips.sql", 'r').read())
-	conn.commit()
+	mcur.execute(open("SQL/01_Loading/create_trips.sql", 'r').read())
+	mconn.commit()
 
 	#Read trips from file
 	#Count lines for status indicator
@@ -70,6 +74,6 @@ if __name__ == '__main__':
 
 	#parse trips
 	print("Loading trips...")
-	mapper = util.MapReduce(read_trip, upload_trip, num_workers = 4)
+	mapper = util.MapReduce(read_trip, upload_trip, num_workers = 4, initializer = init)
 	trips = mapper(enumerate(open(config.TRIPS_FILE, 'r').xreadlines()), length = linecount, pipe = True, chunksize = 1000, out = False)
-	conn.commit()
+	
