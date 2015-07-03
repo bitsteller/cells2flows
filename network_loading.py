@@ -22,7 +22,7 @@ def calculate_flows(args):
 
 	cur.execute(flows_sql, data)
 
-	for flow, links in cur.fetchall():
+	for links, flow in cur.fetchall():
 		result.extend([(link, flow) for link in links])
 
 	return result
