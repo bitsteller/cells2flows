@@ -4,7 +4,7 @@
 DROP MATERIALIZED VIEW IF EXISTS cellpath_parts CASCADE;
 
 CREATE MATERIALIZED VIEW cellpath_parts AS 
-SELECT DISTINCT * 
+SELECT DISTINCT parts.part AS part
 FROM ((	SELECT parts.part AS part
 	  	FROM trips, getParts(trips.cellpath) AS parts
 	  	WHERE NOT parts.part[1] = parts.part[2] AND NOT parts.part[3] = parts.part[2]
@@ -16,5 +16,5 @@ FROM ((	SELECT parts.part AS part
 		WHERE NOT parts.part[1] = parts.part[2] AND NOT parts.part[3] = parts.part[2]
       		AND cellpath[0] IN %(cells)s AND cellpath[array_length(cellpath,1)] IN %(cells)s
       )
-	 )
+	 ) AS parts
 WITH DATA;
