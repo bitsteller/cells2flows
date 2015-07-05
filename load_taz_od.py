@@ -56,10 +56,10 @@ if __name__ == '__main__':
 	cur.execute(open("SQL/01_Loading/create_taz_od.sql", 'r').read())
 	conn.commit()
 
-	print("Loading OD data...")
+	print("Loading OD data (takes a while)...")
 	od_pkl = pickle.load(open(config.OD_FILE, 'r'))
 
-	print("Parsing OD data...") #no time-slicing -> interval is -1
+	print("Parsing OD data (takes a while)...") #no time-slicing -> interval is -1
 	rows = ["%i\t%i\t-1\t%i" % (int(float(ostr)), int(float(dstr)), flow) for (ostr, dstr), flow in od_pkl['0'].items()]
 	f = StringIO.StringIO("\n".join(rows))
 

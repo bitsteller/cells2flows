@@ -61,9 +61,9 @@ if __name__ == '__main__':
 	mcur.execute(open("SQL/04_Routing_Network_Loading/create_route_functions.sql", 'r').read())
 	mconn.commit()
 
-	print("Initializing algorithm " + config.ROUTE_ALGORITHM + "...")
 	init_sql_filename = "SQL/04_Routing_Network_Loading/algorithms/" + config.ROUTE_ALGORITHM.upper() + "/init.sql"
 	if os.path.exists(init_sql_filename):
+		print("Initializing algorithm " + config.ROUTE_ALGORITHM + " (may take a while)...")
 		mcur.execute(open(init_sql_filename, 'r').read())
 		mconn.commit()
 	flows_sql = open("SQL/04_Routing_Network_Loading/algorithms/" + config.ROUTE_ALGORITHM.upper() + "/flows.sql", 'r').read()
