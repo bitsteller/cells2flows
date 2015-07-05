@@ -33,7 +33,7 @@
 2. Download osm2po (http://osm2po.de).
 3. Convert the OSM data for the database using osm2po (replace los-angeles_california.osm.pbf with the actual name of the OSM file) with:
 
-	java -Xmx512m -jar osm2poore-5.0.0-signed.jar prefix=la los-angeles_california.osm.pbf
+	java -Xmx512m -jar osm2po-core-5.0.0-signed.jar prefix=la los-angeles_california.osm.pbf
 
 4. Insert the tables to the database:
 
