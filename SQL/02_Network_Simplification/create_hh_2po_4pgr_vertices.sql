@@ -30,3 +30,8 @@ CREATE INDEX hh_2po_4pgr_vertices_geom_idx
 INSERT INTO hh_2po_4pgr_vertices (id, geom)
 WITH p AS ((SELECT source AS id, x1 AS x, y1 AS y FROM hh_2po_4pgr) UNION (SELECT target AS id, x2 AS x, y2 AS y FROM hh_2po_4pgr))
 SELECT id, ST_SetSRID(ST_Makepoint(x, y),4326) FROM p
+
+--also create index for edges
+CREATE INDEX hh_2po_4pgr_geom_way_idx
+  ON hh_2po_4pgr
+  USING GIST (geom_way);
