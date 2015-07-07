@@ -24,7 +24,8 @@ def calculate_flows(args):
 
 	for links, flow in cur.fetchall():
 		result.extend([(link, flow) for link in links])
-
+	
+	conn.commit()
 	return result
 
 def add_flows(item):
