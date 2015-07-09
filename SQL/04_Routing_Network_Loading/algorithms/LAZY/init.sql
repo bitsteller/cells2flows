@@ -43,19 +43,19 @@ $$ LANGUAGE SQL STABLE; --TODO: parameterize SRID
 -- calculates a route roughly following the cellpath (uses characteristic cells as 
 -- waypoints and modified cost on links inside visited cells)
 CREATE OR REPLACE FUNCTION routeLazy(integer[]) RETURNS integer[] AS $$
-	WITH via AS (SELECT array_append(array_prepend(best_startpoint($1), 
-												   get_waypoints(scp.simple_cellpath)), 
-												   best_endpoint($1)) AS points
-				 FROM simple_cellpath AS scp
-				 WHERE scp.cellpath = $1),
-	segment AS (SELECT segment_id, segment 
-				FROM cellpath_segment
-				WHERE cellpath_segment.cellpath = $1
-				ORDER BY segment_id ASC)
-	SELECT array_agg(routeSegmentLazy(via.points[segment_id], via.points[segment_id+1], segment.segment))
-	FROM segment, via;
+	SELECT array_agg(linkid) FROM
+		(WITH via AS (SELECT array_append(array_prepend(best_startpoint($1), 
+													   get_waypoints(scp.simple_cellpath)), 
+													   best_endpoint($1)) AS points
+					 FROM simple_cellpath AS scp
+					 WHERE scp.cellpath = $1),
+		segment AS (SELECT segment_id, segment 
+					FROM cellpath_segment
+					WHERE cellpath_segment.cellpath = $1
+					ORDER BY segment_id ASC)
+		SELECT DISTINCT linkid
+		FROM segment, via, routeSegmentLazy(via.points[segment_id+1], via.points[segment_id+2], segment.segment) AS linkid)
+	AS links;
 $$ LANGUAGE SQL STABLE;
-
-
 
 
