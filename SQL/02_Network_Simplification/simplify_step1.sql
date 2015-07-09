@@ -11,6 +11,11 @@ CREATE TABLE hh_2po_4pgr_lite
   CONSTRAINT pkey_hh_2po_4pgr_lite PRIMARY KEY (id)
 );
 
+--index for edge geometries
+CREATE INDEX hh_2po_4pgr_lite_geom_way_idx
+  ON hh_2po_4pgr_lite
+  USING GIST (geom_way);
+
 --Add border links to simplified network 
 INSERT INTO hh_2po_4pgr_lite
 SELECT DISTINCT r.id, r.source, r.target, r.cost, r.geom_way

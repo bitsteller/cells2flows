@@ -71,7 +71,7 @@ CREATE INDEX idx_trips_start_end_antenna
   USING btree
   (start_antenna, end_antenna);
 
---create a debug view containg lines connecting the cell centroids in every trip
+--create a debug view containing lines connecting the cell centroids in every trip
 CREATE OR REPLACE VIEW trips_geom AS 
  SELECT trips.id,
     ( SELECT st_makeline(( SELECT ant_pos.geom
