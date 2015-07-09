@@ -1,3 +1,10 @@
+DROP MATERIALIZED VIEW IF EXISTS voronoi_extended;
+
+CREATE MATERIALIZED VIEW voronoi_extended AS
+	SELECT id, ST_Transform(ST_Buffer(ST_Transform(voronoi.geom,3857), 500),4326) geom
+	FROM voronoi
+WITH DATA;
+
 --routeSegmentLazy(start_junction, end_junction, segment) for an array of cellids (segment) 
 -- calculates a route from start_junction (hh_2po_4pgr_vertices.id) to end_junction preferring links inside the segment cells
 -- returns a setof linkids (hh_2po_4pgr.id)
@@ -7,12 +14,19 @@ CREATE OR REPLACE FUNCTION routeSegmentLazy(integer, integer, integer[]) RETURNS
  							(SELECT hh_2po_4pgr_lite.id
  							 FROM public.hh_2po_4pgr_lite, voronoi
  						 	WHERE voronoi.id = ANY(ARRAY[' || array_to_string($3,',') || '])
- 						 		AND ST_Intersects(hh_2po_4pgr_lite.geom_way, voronoi.geom))
+ 						 		AND ST_Intersects(hh_2po_4pgr_lite.geom_way, voronoi.geom)),
+ 							preferrable_links AS
+ 							(SELECT hh_2po_4pgr_lite.id
+ 							 FROM public.hh_2po_4pgr_lite, voronoi_extended
+ 						 	WHERE voronoi_extended.id = ANY(ARRAY[' || array_to_string($3,',') || '])
+ 						 		AND ST_Intersects(hh_2po_4pgr_lite.geom_way, voronoi_extended.geom))
  						SELECT hh_2po_4pgr_lite.id, 
  							source, 
  							target, 
  							(CASE WHEN EXISTS(SELECT * FROM preferred_links WHERE preferred_links.id = hh_2po_4pgr_lite.id) THEN
  								0.5*cost
+ 							WHEN EXISTS(SELECT * FROM preferrable_links WHERE preferrable_links.id = hh_2po_4pgr_lite.id) THEN
+ 								0.8*cost
  							ELSE
  								cost
  							END) AS cost
