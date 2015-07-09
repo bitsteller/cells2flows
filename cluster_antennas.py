@@ -108,7 +108,7 @@ if __name__ == '__main__':
 		id != w.id
 		)
 	FROM ant_pos_original AS w;
-	'''
+	''' #TODO: parameterize SRID
 	mcur.execute(sql, {'min_dist': config.MIN_ANTENNA_DIST})
 	graph = {node: edges for node, edges in mcur}
 

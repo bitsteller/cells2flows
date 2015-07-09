@@ -16,8 +16,9 @@ CREATE OR REPLACE FUNCTION routeSegmentLazy(integer, integer, integer[]) RETURNS
  							ELSE
  								cost
  							END) AS cost
- 						FROM hh_2po_4pgr_lite',$1,$2,false, false) AS r;
-$$ LANGUAGE SQL STABLE;
+ 						FROM hh_2po_4pgr_lite',$1,$2,false, false) AS r
+ 	WHERE r.id2 <> -1;
+$$ LANGUAGE SQL STABLE; --TODO: parameterize SRID
 
 
 --test:
