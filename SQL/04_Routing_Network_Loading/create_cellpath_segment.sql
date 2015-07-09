@@ -65,3 +65,9 @@ COMMENT ON COLUMN public.cellpath_segment.segment_id IS
 
 COMMENT ON COLUMN public.cellpath_segment.segment IS
 'the cellpath segment (array of cellids)';
+
+CREATE INDEX cellpath_segment_cellpath_segment_id_idx
+  ON public.cellpath_segment
+  USING btree
+  (cellpath, segment_id);
+
