@@ -23,8 +23,11 @@ def calculate_flows(args):
 	cur.execute(flows_sql, data)
 
 	for links, flow in cur.fetchall():
-		result.extend([(link, flow) for link in links])
-	
+		if links == None:
+			print("WARNING: Flow of " + str(flow) + " could not be loaded (orig_cells=" + str(o) + ",dest_cells=" + str(d) + ")")
+		else:
+			result.extend([(link, flow) for link in links])
+
 	conn.commit()
 	return result
 
