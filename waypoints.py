@@ -76,15 +76,18 @@ def route_cost(xlat, xlon, ylat, ylon, zlat, zlon, attempts = 3):
 		The cost of the calculated route (travel time in seconds) or inf if no route found"""
 
 	data = {}
-	try:
-		data = json.load(urllib2.urlopen('http://www.server.com:5000/viaroute?loc=' + str(xlat) + ',' + str(xlon) + '&loc=' + str(ylat) + ',' + str(ylon) + '&loc=' + str(zlat) + ',' + str(zlon)))
-	except Exception, e:
-		print("WARNING: " + e.message)
-		if attempts > 0:
-			time.sleep(5)
-			return route_cost(xlat, xlon, ylat, ylon, zlat, zlon, attempts = attempts - 1)
-		else:
-			raise e
+	if hasattr(config, "PYOSRM") and config.PYOSRM == True:
+		data = engine.route([(xlat, xlon), (ylat,ylon), (zlat,zlon)])
+	else:
+		try:
+			data = json.load(urllib2.urlopen('http://www.server.com:5000/viaroute?loc=' + str(xlat) + ',' + str(xlon) + '&loc=' + str(ylat) + ',' + str(ylon) + '&loc=' + str(zlat) + ',' + str(zlon)))
+		except Exception, e:
+			print("WARNING: " + e.message)
+			if attempts > 0:
+				time.sleep(5)
+				return route_cost(xlat, xlon, ylat, ylon, zlat, zlon, attempts = attempts - 1)
+			else:
+				raise e
 
 	if "route_summary" in data:
 		return data["route_summary"]["total_time"]
@@ -103,6 +106,11 @@ mapper = None
 request_stop = False
 cur = None
 conn = None
+engine = None
+
+if hasattr(config, "PYOSRM") and config.PYOSRM == True:
+	import pyosrm
+	engine = pyosrm.Engine(config.PYOSRM_FILE)
 
 if __name__ == '__main__':
 	signal.signal(signal.SIGINT, signal_handler) #abort on CTRL-C
