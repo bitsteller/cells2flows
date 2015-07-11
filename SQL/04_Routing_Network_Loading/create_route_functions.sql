@@ -18,7 +18,7 @@ $BODY$
     BEGIN
     FOR i IN 1 .. array_length($1,1)-1
     LOOP
-	part_route := (SELECT ROW(array_agg(r.id2), SUM(r.cost)) FROM pgr_dijkstra('SELECT * FROM hh_2po_4pgr_lite',$1[i],$1[i+1],false, false) AS r);
+	part_route := (SELECT ROW(array_agg(r.id2), SUM(r.cost)) FROM pgr_dijkstra('SELECT * FROM hh_2po_4pgr_lite',$1[i],$1[i+1], true, true) AS r);
 	temp_edges := array_cat(temp_edges, part_route.edges[1:array_length(part_route.edges,1)-1]);
 	temp_cost := temp_cost + part_route.cost;
     END LOOP;

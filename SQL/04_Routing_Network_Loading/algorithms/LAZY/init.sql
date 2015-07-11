@@ -29,8 +29,15 @@ CREATE OR REPLACE FUNCTION routeSegmentLazy(integer, integer, integer[]) RETURNS
  								0.8*cost
  							ELSE
  								cost
- 							END) AS cost
- 						FROM hh_2po_4pgr_lite',$1,$2,false, false) AS r
+ 							END) AS cost,
+ 							(CASE WHEN EXISTS(SELECT * FROM preferred_links WHERE preferred_links.id = hh_2po_4pgr_lite.id) THEN
+ 								0.5*reverse_cost
+ 							WHEN EXISTS(SELECT * FROM preferrable_links WHERE preferrable_links.id = hh_2po_4pgr_lite.id) THEN
+ 								0.8*reverse_cost
+ 							ELSE
+ 								reverse_cost
+ 							END) AS reverse_cost
+ 						FROM hh_2po_4pgr_lite', $1, $2, true, true) AS r
  	WHERE r.id2 <> -1;
 $$ LANGUAGE SQL STABLE; --TODO: parameterize SRID
 
