@@ -10,11 +10,11 @@ WITH targets AS (
      visited_edges AS (
          SELECT DISTINCT unnest(
              (SELECT array_agg(DISTINCT cr.id3) AS id FROM pgr_kdijkstraPath(
-                 'SELECT id, source, target, cost FROM hh_2po_4pgr',
+                 'SELECT id, source, target, cost, reverse_cost FROM hh_2po_4pgr',
                  source.junction_id,
                  array_remove(targets.junctions, source.junction_id),
-                 false,
-                 false) AS cr)
+                 true,
+                 true) AS cr)
               ) AS id
          FROM boundary_junctions AS source,
               targets
@@ -24,7 +24,7 @@ WITH targets AS (
 )
 
 INSERT INTO hh_2po_4pgr_lite
-SELECT r.id, r.source, r.target, r.cost, r.geom_way
+SELECT r.id, r.source, r.target, r.cost, r.reverse_cost, r.geom_way
 FROM visited_edges AS e,
      hh_2po_4pgr AS r
 WHERE r.id = e.id
