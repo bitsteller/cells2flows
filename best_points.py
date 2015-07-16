@@ -138,7 +138,7 @@ if __name__ == '__main__':
 		FROM (
 			(SELECT DISTINCT cellpath FROM trips)
 				UNION
-			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath \ --include virtual cellpath for od pairs without any cellpath
+			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath --include virtual cellpath for od pairs without any cellpath
 				FROM od
 				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = cd.dest_cell)
 			)
@@ -151,11 +151,11 @@ if __name__ == '__main__':
 	print(str(remaining) + " startpoints to be calculated" )
 
 	startparts = fetch_parts("""
-		SELECT DISTINCT trips.cellpath[1:2] \
+		SELECT DISTINCT trips.cellpath[1:2]
 		FROM (
 			(SELECT DISTINCT cellpath FROM trips)
 				UNION
-			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath \ --include virtual cellpath for od pairs without any cellpath
+			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath --include virtual cellpath for od pairs without any cellpath
 				FROM od
 				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = cd.dest_cell)
 			)
@@ -175,7 +175,7 @@ if __name__ == '__main__':
 		FROM (
 			(SELECT DISTINCT cellpath FROM trips)
 				UNION
-			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath \ --include virtual cellpath for od pairs without any cellpath
+			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath --include virtual cellpath for od pairs without any cellpath
 				FROM od
 				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = cd.dest_cell)
 			)
@@ -191,7 +191,7 @@ if __name__ == '__main__':
 		FROM (
 			(SELECT DISTINCT cellpath FROM trips)
 				UNION
-			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath \ --include virtual cellpath for od pairs without any cellpath
+			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath --include virtual cellpath for od pairs without any cellpath
 				FROM od
 				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = cd.dest_cell)
 			)
