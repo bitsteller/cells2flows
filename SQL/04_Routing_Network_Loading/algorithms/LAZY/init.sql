@@ -9,7 +9,9 @@ WITH DATA;
 -- calculates a route from start_junction (hh_2po_4pgr_vertices.id) to end_junction preferring links inside the segment cells
 -- returns a setof linkids (hh_2po_4pgr.id)
 CREATE OR REPLACE FUNCTION routeSegmentLazy(integer, integer, integer[]) RETURNS SETOF integer AS $$
-	SELECT r.id2
+	BEGIN
+ 	RETURN QUERY (
+ 	SELECT r.id2
  	FROM pgr_dijkstra('	WITH preferred_links AS 
  							(SELECT hh_2po_4pgr_lite.id
  							 FROM public.hh_2po_4pgr_lite, voronoi
@@ -36,10 +38,17 @@ CREATE OR REPLACE FUNCTION routeSegmentLazy(integer, integer, integer[]) RETURNS
  								0.8*reverse_cost
  							ELSE
  								reverse_cost
- 							END) AS reverse_cost
+ 							END) AS reverse_cost --,
+							--ST_X(ST_StartPoint(hh_2po_4pgr_lite.geom_way)) AS x1,
+							--ST_Y(ST_StartPoint(hh_2po_4pgr_lite.geom_way)) AS y1,
+							--ST_X(ST_EndPoint(hh_2po_4pgr_lite.geom_way)) AS x2,
+							--ST_Y(ST_EndPoint(hh_2po_4pgr_lite.geom_way)) AS y2
  						FROM hh_2po_4pgr_lite', $1, $2, true, true) AS r
- 	WHERE r.id2 <> -1;
-$$ LANGUAGE SQL STABLE; --TODO: parameterize SRID
+ 	WHERE r.id2 <> -1);
+	EXCEPTION WHEN others THEN
+		RETURN QUERY (SELECT NULL::integer AS id2);
+    END
+$$ LANGUAGE plpgsql STABLE; --TODO: parameterize SRID
 
 
 --test:

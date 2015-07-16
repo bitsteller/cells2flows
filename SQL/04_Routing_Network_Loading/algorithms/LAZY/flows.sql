@@ -13,4 +13,5 @@ WITH cellpath_flow AS (	SELECT od.orig_cell, od.dest_cell, cellpath, cellpath.sh
 							AND od.interval = %(interval)s
 					   )
 SELECT routeLazy(cellpath_flow.cellpath) AS links,
-	   flow AS flow FROM cellpath_flow
+	   flow AS flow 
+FROM cellpath_flow
