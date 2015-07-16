@@ -71,10 +71,10 @@ $$ LANGUAGE SQL STABLE;
 --LIMIT 10
 
 
--- getTopCellpaths(orig_cellid, dest_cellid, n) fetches the top n (most likeley) cellpaths from orig_cellid to dest_cellid
+-- _getTopCellpaths(orig_cellid, dest_cellid, n) fetches the top n (most likeley) cellpaths from orig_cellid to dest_cellid
 -- the result is returned as a table containg the top n cellpath and their share (likelihood)
 -- shares are normalized to sum up to 1.0 in the resulting table
-CREATE OR REPLACE FUNCTION getTopCellpaths(integer, integer, integer) RETURNS table(cellpath int[], share double precision) AS $$
+CREATE OR REPLACE FUNCTION _getTopCellpaths(integer, integer, integer) RETURNS table(cellpath int[], share double precision) AS $$
     WITH ranked_cellpath AS (
         SELECT cellpath_dist.cellpath AS cellpath, cellpath_dist.share
         FROM cellpath_dist
@@ -85,6 +85,21 @@ CREATE OR REPLACE FUNCTION getTopCellpaths(integer, integer, integer) RETURNS ta
         )
     SELECT cellpath, share/(SELECT SUM(share) FROM ranked_cellpath)  FROM ranked_cellpath
 $$ LANGUAGE SQL STABLE;
+
+
+-- getTopCellpaths(orig_cellid, dest_cellid, n) fetches the top n (most likeley) cellpaths from orig_cellid to dest_cellid
+-- the result is returned as a table containg the top n cellpath and their share (likelihood)
+-- shares are normalized to sum up to 1.0 in the resulting table
+-- if no cellpath is found, 
+CREATE OR REPLACE FUNCTION getTopCellpaths(integer, integer, integer) RETURNS table(cellpath int[], share double precision) AS $$
+    BEGIN
+        IF EXISTS(SELECT * FROM _getTopCellpaths($1,$2,$3)) THEN
+            RETURN QUERY (SELECT * FROM _getTopCellpaths($1,$2,$3));
+        ELSE
+            RETURN QUERY (SELECT ARRAY[$1,$2],1.0::double precision); --return virtual cellpath containing start and end cell
+        END IF;
+    END
+$$ LANGUAGE 'plpgsql' STABLE;
 
 
 --SELECT * FROM getTopCellpaths(1,4,5)
