@@ -14,7 +14,7 @@ FROM ((	SELECT parts.part AS part
 	 (	SELECT parts.part AS part
 	  	FROM simple_cellpath, getParts(simple_cellpath.simple_cellpath) AS parts
 		WHERE NOT parts.part[1] = parts.part[2] AND NOT parts.part[3] = parts.part[2]
-      		AND cellpath[0] IN %(cells)s AND cellpath[array_length(cellpath,1)] IN %(cells)s
+      		AND cellpath[1] IN %(cells)s AND cellpath[array_length(cellpath,1)] IN %(cells)s
       )
 	 ) AS parts
 WITH DATA;
