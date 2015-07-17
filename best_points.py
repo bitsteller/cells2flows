@@ -140,7 +140,7 @@ if __name__ == '__main__':
 				UNION
 			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath --include virtual cellpath for od pairs without any cellpath
 				FROM od
-				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = cd.dest_cell)
+				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = od.dest_cell)
 			)
 		) AS trips
 		WHERE 	array_length(trips.cellpath, 1) >= 2 AND
@@ -157,7 +157,7 @@ if __name__ == '__main__':
 				UNION
 			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath --include virtual cellpath for od pairs without any cellpath
 				FROM od
-				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = cd.dest_cell)
+				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = od.dest_cell)
 			)
 		) AS trips
 		WHERE 	array_length(trips.cellpath, 1) >= 2 AND
@@ -177,7 +177,7 @@ if __name__ == '__main__':
 				UNION
 			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath --include virtual cellpath for od pairs without any cellpath
 				FROM od
-				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = cd.dest_cell)
+				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = od.dest_cell)
 			)
 		) AS trips
 		WHERE 	array_length(trips.cellpath, 1) >= 2 AND
@@ -193,7 +193,7 @@ if __name__ == '__main__':
 				UNION
 			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath --include virtual cellpath for od pairs without any cellpath
 				FROM od
-				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = cd.dest_cell)
+				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = od.dest_cell)
 			)
 		) AS trips
 		WHERE 	array_length(trips.cellpath, 1) >= 2 AND
