@@ -45,9 +45,7 @@ def best_point(part):
 
 		#fetch waypoint candidates
 		data = (a,) if direction == 1 else (b,)
-		sql = "	SELECT junction_id AS yid, ST_Y(y.geom) AS ylat, ST_X(y.geom) AS ylon\
-				FROM boundary_junctions, hh_2po_4pgr_vertices AS y\
-				WHERE antenna_id = %s AND y.id = boundary_junctions.junction_id"
+		sql = "	SELECT * FROM get_candidate_junctions(%s)"
 		cur.execute(sql, data)
 		y_candidates = cur.fetchall()
 
@@ -64,6 +62,9 @@ def best_point(part):
 			y = y_candidates[costs.index(min(costs))][0]
 
 	data = ([a,b], y)
+	if y == None:
+		print("WARNING: no start/endpoint found for " + str([a,b]))
+
 	if direction == 1:
 		cur.execute("INSERT INTO best_startpoint VALUES (%s,%s);", data)
 

@@ -44,9 +44,7 @@ def best_waypoint(segment):
 		x, xlat, xlon, z, zlat, zlon = cur.fetchone()
 
 		#fetch waypoint candidates
-		sql = "	SELECT junction_id AS yid, ST_Y(y.geom) AS ylat, ST_X(y.geom) AS ylon\
-				FROM boundary_junctions, hh_2po_4pgr_vertices AS y\
-				WHERE antenna_id = %s AND y.id = boundary_junctions.junction_id"
+		sql = "	SELECT * FROM get_candidate_junctions(%s)"
 		cur.execute(sql, (b,))
 		y_candidates = cur.fetchall()
 
@@ -59,6 +57,9 @@ def best_waypoint(segment):
 		#select cheapest waypoint
 		if len(costs) > 0 and min(costs) < float("inf"): #at least one feasible route found
 			y = y_candidates[costs.index(min(costs))][0]
+
+	if y == None:
+		print("WARNING: no waypoint found for " + str([a,b]))
 
 	cur.execute("INSERT INTO waypoints VALUES (%s,%s);", ([a,b,c], y))
 	conn.commit()
