@@ -3,8 +3,6 @@ import unittest
 
 import config, util
 
-from witica.source import SourceItemList
-
 class TestVerifyDB(unittest.TestCase):
 	"""Runs several test to verify the integrity of the database
 	"""
