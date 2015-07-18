@@ -135,34 +135,20 @@ if __name__ == '__main__':
 
 	#get number of remaining segments to calculate
 	sql_remaining = """
-		SELECT COUNT(DISTINCT trips.cellpath[1:2])
-		FROM (
-			(SELECT DISTINCT cellpath FROM trips)
-				UNION
-			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath --include virtual cellpath for od pairs without any cellpath
-				FROM od
-				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = od.dest_cell)
-			)
-		) AS trips
-		WHERE 	array_length(trips.cellpath, 1) >= 2 AND
-				NOT EXISTS(SELECT * FROM best_startpoint WHERE best_startpoint.part = trips.cellpath[1:2])
+		SELECT COUNT(DISTINCT cellpath[1:2])
+		FROM cellpath_dist
+		WHERE 	array_length(cellpath, 1) >= 2 AND
+				NOT EXISTS(SELECT * FROM best_startpoint WHERE best_startpoint.part = cellpath[1:2])
 	"""
 	mcur.execute(sql_remaining)
 	remaining = mcur.fetchone()[0]
 	print(str(remaining) + " startpoints to be calculated" )
 
 	startparts = fetch_parts("""
-		SELECT DISTINCT trips.cellpath[1:2]
-		FROM (
-			(SELECT DISTINCT cellpath FROM trips)
-				UNION
-			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath --include virtual cellpath for od pairs without any cellpath
-				FROM od
-				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = od.dest_cell)
-			)
-		) AS trips
-		WHERE 	array_length(trips.cellpath, 1) >= 2 AND
-				NOT EXISTS(SELECT * FROM best_startpoint WHERE best_startpoint.part = trips.cellpath[1:2])""")
+		SELECT DISTINCT cellpath[1:2]
+		FROM cellpath_dist
+		WHERE 	array_length(cellpath, 1) >= 2 AND
+				NOT EXISTS(SELECT * FROM best_startpoint WHERE best_startpoint.part = cellpath[1:2])""")
 
 	print("Calculating startpoints...")
 	direction = 1 #startpoints
@@ -172,33 +158,19 @@ if __name__ == '__main__':
 
 	#get number of remaining segments to calculate
 	sql_remaining = """
-		SELECT COUNT(DISTINCT trips.cellpath[array_upper(trips.cellpath,1)-1:array_upper(trips.cellpath,1)])
-		FROM (
-			(SELECT DISTINCT cellpath FROM trips)
-				UNION
-			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath --include virtual cellpath for od pairs without any cellpath
-				FROM od
-				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = od.dest_cell)
-			)
-		) AS trips
-		WHERE 	array_length(trips.cellpath, 1) >= 2 AND
-				NOT EXISTS(SELECT * FROM best_endpoint WHERE best_endpoint.part = trips.cellpath[array_upper(trips.cellpath,1)-1:array_upper(trips.cellpath,1)])"""
+		SELECT COUNT(DISTINCT cellpath[array_upper(cellpath,1)-1:array_upper(cellpath,1)])
+		FROM cellpath_dist
+		WHERE 	array_length(cellpath, 1) >= 2 AND
+				NOT EXISTS(SELECT * FROM best_endpoint WHERE best_endpoint.part = cellpath[array_upper(cellpath,1)-1:array_upper(cellpath,1)])"""
 	mcur.execute(sql_remaining)
 	remaining = mcur.fetchone()[0]
 	print(str(remaining) + " endpoints to be calculated" )
 
 	endparts = fetch_parts("""
-		SELECT DISTINCT trips.cellpath[array_upper(trips.cellpath,1)-1:array_upper(trips.cellpath,1)]
-		FROM (
-			(SELECT DISTINCT cellpath FROM trips)
-				UNION
-			(SELECT ARRAY[od.orig_cell, od.dest_cell] AS cellpath --include virtual cellpath for od pairs without any cellpath
-				FROM od
-				WHERE NOT EXISTS(SELECT * FROM cellpath_dist cd WHERE cd.orig_cell = od.orig_cell AND cd.dest_cell = od.dest_cell)
-			)
-		) AS trips
-		WHERE 	array_length(trips.cellpath, 1) >= 2 AND
-				NOT EXISTS(SELECT * FROM best_endpoint WHERE best_endpoint.part = trips.cellpath[array_upper(trips.cellpath,1)-1:array_upper(trips.cellpath,1)])""")
+		SELECT DISTINCT cellpath[array_upper(cellpath,1)-1:array_upper(cellpath,1)]
+		FROM cellpath_dist
+		WHERE 	array_length(cellpath, 1) >= 2 AND
+				NOT EXISTS(SELECT * FROM best_endpoint WHERE best_endpoint.part = cellpath[array_upper(cellpath,1)-1:array_upper(cellpath,1)])""")
 
 	print("Calculating endpoints...")
 	direction = -1 #endpoints

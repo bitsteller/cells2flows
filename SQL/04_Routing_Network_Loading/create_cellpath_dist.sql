@@ -4,18 +4,29 @@
 DROP MATERIALIZED VIEW IF EXISTS cellpath_dist CASCADE;
 
 CREATE MATERIALIZED VIEW cellpath_dist AS 
-  SELECT  trips.start_antenna AS orig_cell, --origin cell id
-          trips.end_antenna AS dest_cell, --destination cell id
-          cellpath, --cellpath array containg the list of visitied cells
-          COUNT(*)::double precision/(SELECT COUNT(*) 
-                                      FROM trips AS trips_all 
-                                      WHERE trips_all.start_antenna = trips.start_antenna 
-                                        AND trips_all.end_antenna = trips.end_antenna 
-                                        AND array_length(trips_all.cellpath,1) >= 3) 
-            AS share --probablity of the cellpath for the given cell od pair
-  FROM trips
-  WHERE array_length(cellpath,1) >= 3
-  GROUP BY trips.start_antenna, trips.end_antenna, cellpath
+  ( -- "real" cellpaths
+    SELECT  trips.start_antenna AS orig_cell, --origin cell id
+            trips.end_antenna AS dest_cell, --destination cell id
+            cellpath, --cellpath array containg the list of visitied cells
+            COUNT(*)::double precision/(SELECT COUNT(*) 
+                                        FROM trips AS trips_all 
+                                        WHERE trips_all.start_antenna = trips.start_antenna 
+                                          AND trips_all.end_antenna = trips.end_antenna 
+                                          AND array_length(trips_all.cellpath,1) >= 3) 
+              AS share --probablity of the cellpath for the given cell od pair
+    FROM trips
+    WHERE array_length(cellpath,1) >= 3
+    GROUP BY trips.start_antenna, trips.end_antenna, cellpath
+  )
+  UNION
+  ( --virtual cellpaths for OD pairs without real cellpaths
+    SELECT  od.orig_cell AS orig_cell,
+            od.dest_cell AS dest_cell,
+            ARRAY[od.orig_cell, od.dest_cell] AS cellpath,
+            1.0::double precision AS share
+    FROM od
+    WHERE NOT EXISTS(SELECT * FROM trips WHERE trips.start_antenna = od.orig_cell AND trips.end_antenna = od.dest_cell)  
+  )
 WITH DATA;
 
 CREATE INDEX idx_cellpath_dist_orig_dest
