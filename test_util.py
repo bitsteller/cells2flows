@@ -40,5 +40,5 @@ class TestUtil(unittest.TestCase):
 		gen = util.chunks(l, 2)
 		expected_result = [[1,2],[3,4],[5,6],[7,8],[9]]
 		for expected, returned in zip(expected_result, gen):
-			assertEqual(expected, returned)
+			self.assertEqual(expected, returned)
 
