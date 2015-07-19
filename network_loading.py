@@ -25,6 +25,7 @@ def calculate_flows(args):
 	for links, flow in cur.fetchall():
 		if links == None:
 			print("WARNING: Flow of " + str(flow) + " could not be loaded (orig_cells=" + str(o) + ",dest_cells=" + str(d) + ")")
+			#result.extend([(0,flow)]) #to check how much flow is lost
 		else:
 			result.extend([(link, flow) for link in links])
 
@@ -33,6 +34,7 @@ def calculate_flows(args):
 
 def add_flows(item):
 	link, flows = item
+	#print(sum(flows)) #to check how much flow is lost
 	return (link, sum(flows))
 
 def signal_handler(signal, frame):
@@ -81,6 +83,7 @@ if __name__ == '__main__':
 
 		mapper = util.MapReduce(calculate_flows, add_flows, initializer = init) #add flows 
 		linkflows = mapper(util.od_chunks(chunksize = 3), length = len(config.CELLS)*len(config.CELLS)//3 + len(config.CELLS), chunksize = 3)
+		#linkflows = mapper([([363],[4])], length = len(config.CELLS)*len(config.CELLS)//3 + len(config.CELLS), chunksize = 3)
 
 		print("Uploading to database...")
 		f = StringIO.StringIO("\n".join(["%i\t%i\t%f" % (linkid, interval, flow) for linkid, flow in linkflows]))
