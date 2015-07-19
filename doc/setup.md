@@ -120,6 +120,19 @@ When you performed all the previous steps , you can run the whole pipleline thro
 	
 *Warning*: Be aware that when you run the process from the beginning all previously calculated data will be deleted from the database.
 	
+# Run tests
+To run unit tests on the the util.py module:
+	
+		python -m unittest test_util
+		
+After run_experiments.py has finished with all steps, you can verify the (intermediate) results in the database. To run fast tests (some test only check a random sample of the data) use 
+
+	python -m unittest test_db_integrity_fast
+	
+To check all data you can additionally run the slow tests (this can take several hours depending on the amout of data):
+
+	python -m unittest test_db_integrity_slow
+	
 # DB Structure and Tables
 
 ## Input tables:
