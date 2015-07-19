@@ -60,9 +60,10 @@ $$ LANGUAGE plpgsql STABLE; --TODO: parameterize SRID
 -- waypoints and modified cost on links inside visited cells)
 CREATE OR REPLACE FUNCTION routeLazy(integer[]) RETURNS integer[] AS $$
 	SELECT array_agg(linkid) FROM
-		(WITH via AS (SELECT array_append(array_prepend(best_startpoint($1), 
+		(WITH via AS (SELECT array_append(array_prepend((SELECT junction_id FROM get_candidate_junctions($1[array_lower($1,1)]) ORDER BY random() LIMIT 1),--best_startpoint($1), 
 													   get_waypoints(scp.simple_cellpath)), 
-													   best_endpoint($1)) AS points
+													   (SELECT junction_id FROM get_candidate_junctions($1[array_upper($1,1)]) ORDER BY random() LIMIT 1)--best_endpoint($1)
+										 ) AS points
 					 FROM simple_cellpath AS scp
 					 WHERE scp.cellpath = $1),
 		segment AS (SELECT segment_id, segment 
