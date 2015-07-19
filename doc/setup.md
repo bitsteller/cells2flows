@@ -5,15 +5,15 @@
 1. Install postgresql, postgis, pgrouting
 2. Init DB in an empty folder:
 
-	initdb -D <path for DB storage>
+		initdb -D <path for DB storage>
 
 3. Start DB server:
 
-	postgres -D <path for DB storage>
+		postgres -D <path for DB storage>
 
 4. Create the database (postgis template):
 
-	createdb template_postgis
+		createdb template_postgis
 
 5. Load spatial data types and functions:
 
@@ -107,16 +107,10 @@ All configuration parameters are set in the file `config.py`. The available para
 - `TRIPS`: trip ids to use, if not set all loaded trips are used
 - `NOTIFY_CMD`: a command that will be called upon completion or failure of the traffic assignment, a message is passed to the command through STDIN. The script could for example send a push notification to www.boxcar.io or send an email to notify you of the computation status
 - `MIN_ANTENNA_DIST`: min distance between antennas in meteres (antennas with a smaller distance are merged during clustering)
-- `BBOX`: A dictionary containing a bounding box for which the calculation is done (Voronoi cells will be cut of at the end of the bounding box)
-
-An example bounding box dictionary looks like this:
-
-	BBOX = {
-			"top": 34.34,
-			"bottom": 33.87,
-			"left": -118.4,
-			"right": -117.6
-		}
+- `MAX_CELLPATHS`: the maxium number of cellpaths to use for each OD pair, only the `MAX_CELLPATHS` most likeley cellpaths (larger value = more accurate, smaller value=faster computation); recommended value: 10
+- `ROUTE_ALGORITHM`: route algorithm to use during network loading, supportet algorithms are "LAZY" (Lazy Voronoi Routing), "STRICT" (Strict Voronoi Routing), "SHORTEST" (shortest path between start and destination cell)
+- `PYOSRM` (optional): If False (default), osrm has to listen as an HTTP server on localhost to answer routing request; if True the pyosrm wrapper library is used to communicate with osrm (much faster)
+- `PYOSRM_FILE` (necessary if PYOSRM=TRUE): The prepared .osrm file that osrm should use for routing
 
 # Run the full traffic assignment procedure
 	
