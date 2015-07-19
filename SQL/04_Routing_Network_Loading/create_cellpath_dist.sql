@@ -29,7 +29,12 @@ CREATE MATERIALIZED VIEW cellpath_dist AS
   )
 WITH DATA;
 
-CREATE INDEX idx_cellpath_dist_orig_dest
+CREATE INDEX idx_cellpath_dist_orig
   ON public.cellpath_dist
   USING btree
-  (orig_cell, dest_cell);
+  (orig_cell);
+
+CREATE INDEX idx_cellpath_dist_dest
+  ON public.cellpath_dist
+  USING btree
+  (dest_cell);
