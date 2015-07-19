@@ -98,7 +98,7 @@ All configuration parameters are set in the file `config.py`. The available para
 - `PYOSRM` (optional): If False (default), osrm has to listen as an HTTP server on localhost to answer routing request; if True the pyosrm wrapper library is used to communicate with osrm (much faster)
 - `PYOSRM_FILE` (necessary if PYOSRM=TRUE): The prepared .osrm file that osrm should use for routing
 - `NOTIFY_CMD` (optional): a command that will be called upon completion or failure of the traffic assignment, a message is passed to the command through STDIN. The script could for example send a push notification to www.boxcar.io or send an email to notify you of the computation status
-- 
+
 ## Loading parameters
 - `ANTENNA_FILE`: filname of the csv file containing the antenna positions
 - `TRIPS_FILE`: filname of the csv file containing the trips (STEM data/cellpaths)
