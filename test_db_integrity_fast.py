@@ -106,7 +106,7 @@ class TestVerifyDBFast(unittest.TestCase):
 			})
 			covered_od_flow += self.cur.fetchone()[0]
 
-		self.assertEqual(total_od_flow, covered_od_flow)
+		self.assertAlmostEqual(total_od_flow, covered_od_flow)
 
 	def test_route_lazy_all_flow_assigned(self):
 		self.validate_route_algo_all_flow_assigned("LAZY")
