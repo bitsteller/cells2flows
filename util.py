@@ -133,6 +133,18 @@ def od_chunks(chunksize = 200):
 		for destinations in chunks(config.CELLS, chunksize):
 			yield ([origin], destinations)
 
+def get_random_od_data(limit):
+	conn = db_connect()
+	cur = conn.cursor()
+	sql = "	SELECT orig_cell, dest_cell, interval, flow \
+			FROM (SELECT * FROM od ORDER BY random() LIMIT %s) AS od"
+	cur.execute(sql, (limit,))
+	result = []
+	for orig_cell, dest_cell, interval, flow in cur:
+		result.append({"interval": interval, "orig_cells": [orig_cell], "dest_cells": [dest_cell], "flow": flow})
+	conn.commit()
+	return result
+
 def db_login(force_password=False):
 	"""Makes sure that config.PASSWORD is set to the database password. 
 	If config.PASSWORD is alread defined, this function will not do anything. Otherwise
@@ -400,7 +412,6 @@ class Timer(object):
 #make sure config.CELLS exsits
 if not hasattr(config, "CELLS"):
 	try:
-		db_login()
 		conn = db_connect()
 		cur = conn.cursor()
 		cur.execute("SELECT MIN(id) AS min, MAX(id) AS max FROM ant_pos")
@@ -414,7 +425,6 @@ if not hasattr(config, "CELLS"):
 #make sure config.TRIPS exsits
 if not hasattr(config, "TRIPS"):
 	try:
-		db_login()
 		conn = db_connect()
 		cur = conn.cursor()
 		cur.execute("SELECT MIN(id) AS min, MAX(id) AS max FROM trips_original")
@@ -427,7 +437,6 @@ if not hasattr(config, "TRIPS"):
 #make sure config.TRIPS exsits
 if not hasattr(config, "INTERVALS"):
 	try:
-		db_login()
 		conn = db_connect()
 		cur = conn.cursor()
 		cur.execute("SELECT array_agg(DISTINCT interval) FROM taz_od")

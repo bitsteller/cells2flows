@@ -65,7 +65,7 @@ class TestVerifyDBFast(unittest.TestCase):
 		total_taz_od_flow, total_od_flow = self.cur.fetchone()
 
 		if total_taz_od_flow != total_od_flow:
-			print("WARNING: Total OD flow in cell od matrix diverges from orignal TAZ based OD matrix by " + str(100*(total_od_flow-total_taz_od_flow)/total_taz_od_flow) + "%.")
+			print("WARNING: Total OD flow in cell od matrix diverges from orignal TAZ based OD matrix by " + str(100*(total_od_flow-total_taz_od_flow)/total_taz_od_flow) + "%")
 		self.assertTrue(total_od_flow < 1.05*total_taz_od_flow) #allow up to 5% difference
 		self.assertTrue(total_od_flow > 0.95*total_taz_od_flow) #allow up to 5% difference
 
@@ -93,12 +93,43 @@ class TestVerifyDBFast(unittest.TestCase):
 		cellpaths_with_missing_waypoints = self.cur.fetchone()[0]
 		self.assertEqual(0, cellpaths_with_missing_waypoints)
 
+	def test_all_odpairs_covered(self):
+		self.cur.execute("SELECT SUM(flow) FROM od")
+		total_od_flow = self.cur.fetchone()[0]
+
+		covered_od_flow = 0
+		for o_cells, d_cells in util.od_chunks(chunksize = 5000):
+			self.cur.execute("SELECT SUM(flow) FROM od WHERE od.orig_cell = ANY(%(o_cells)s) AND od.dest_cell = ANY(%(d_cells)s)",
+			{
+				"o_cells": o_cells,
+				"d_cells": d_cells
+			})
+			covered_od_flow += self.cur.fetchone()[0]
+
+		self.assertEqual(total_od_flow, covered_od_flow)
+
 	def test_route_lazy_all_flow_assigned(self):
-		pass
+		self.validate_route_algo_all_flow_assigned("LAZY")
 
 	def test_route_strict_all_flow_assigned(self):
-		pass
+		self.validate_route_algo_all_flow_assigned("STRICT")
 
-	def test_route_shortest_all_flow_assigned(self):
-		pass
+	#def test_route_shortest_all_flow_assigned(self):
+	#	self.validate_route_algo_all_flow_assigned("SHORTEST")
 
+	def validate_route_algo_all_flow_assigned(self, algorithm):
+		for od_data in util.get_random_od_data(50):
+			assigned_flow = 0
+			for links, flow in self.assign_flow(od_data, algorithm):
+				self.assertNotEqual(None, links)
+				self.assertTrue(len(links) > 0)
+				assigned_flow += flow
+			self.assertAlmostEqual(od_data["flow"], assigned_flow)
+
+	def assign_flow(self,od_data, algorithm):
+		od_data["max_cellpaths"] = config.MAX_CELLPATHS
+		flows_sql = open("SQL/04_Routing_Network_Loading/algorithms/" + algorithm.upper() + "/flows.sql", 'r').read()
+		self.cur.execute(flows_sql, od_data)
+		result = self.cur.fetchall()
+		self.conn.commit()
+		return result

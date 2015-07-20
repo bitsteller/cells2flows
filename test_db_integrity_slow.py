@@ -36,3 +36,29 @@ class TestVerifyDBSlow(unittest.TestCase):
 		self.cur.execute(sql)
 		cellpaths_with_missing_waypoints = self.cur.fetchone()[0]
 		self.assertEqual(0, cellpaths_with_missing_waypoints)
+
+	def test_route_lazy_all_flow_assigned(self):
+		self.validate_route_algo_all_flow_assigned("LAZY")
+
+	def test_route_strict_all_flow_assigned(self):
+		self.validate_route_algo_all_flow_assigned("STRICT")
+
+	#def test_route_shortest_all_flow_assigned(self):
+		#self.validate_route_algo_all_flow_assigned("SHORTEST")
+
+	def validate_route_algo_all_flow_assigned(self, algorithm):
+		for od_data in util.get_random_od_data(10000):
+			assigned_flow = 0
+			for links, flow in self.assign_flow(od_data, algorithm):
+				self.assertNotEqual(None, links)
+				self.assertTrue(len(links) > 0)
+				assigned_flow += flow
+			self.assertEqual(od_data["flow"], assigned_flow)
+
+	def assign_flow(self,od_data, algorithm):
+		od_data["max_cellpaths"] = config.MAX_CELLPATHS
+		flows_sql = open("SQL/04_Routing_Network_Loading/algorithms/" + algorithm.upper() + "/flows.sql", 'r').read()
+		self.cur.execute(flows_sql, od_data)
+		result = self.cur.fetchall()
+		self.conn.commit()
+		return result
