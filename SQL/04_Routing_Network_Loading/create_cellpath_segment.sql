@@ -8,18 +8,18 @@ $BODY$
     segment_id := -1;
     FOR i IN 1 .. array_length($1,1) LOOP
       cellid := $1[i];
-    IF $1[i] = simplified[segment_id+1] AND i < array_length($1,1) THEN
-      IF i > 1 THEN
+      IF $1[i] = simplified[segment_id+1] AND i < array_length($1,1) THEN
+        IF i > 1 THEN
+          RETURN NEXT;
+        END IF;
+        segment_id := segment_id + 1;
+        RETURN NEXT;
+      ELSE
+        IF i = 1 THEN
+          segment_id := segment_id + 1;
+        END IF;
         RETURN NEXT;
       END IF;
-      segment_id := segment_id + 1;
-      RETURN NEXT;
-    ELSE
-      IF i = 1 THEN
-        segment_id := segment_id + 1;
-      END IF;
-      RETURN NEXT;
-    END IF;
     END LOOP;
     RETURN;
     END
