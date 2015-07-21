@@ -1,7 +1,10 @@
 # coding=utf-8
-import unittest
+import unittest, os.path
 
 import config, util
+
+print("INFO: Not all data is verified, run slow tests additionally to run complete verification.")
+print("Running fast tests (can take a few minutes)...")
 
 class TestVerifyDBFast(unittest.TestCase):
 	"""Runs several test to verify the integrity of the database. 
@@ -14,6 +17,47 @@ class TestVerifyDBFast(unittest.TestCase):
 
 	def tearDown(self):
 		self.conn.close()
+
+	def test_config_ok_general_settings(self):
+		self.assertTrue(hasattr(config, "USER"))
+		self.assertTrue(hasattr(config, "USER"))
+		self.assertTrue(hasattr(config, "PORT"))
+		if hasattr(config, "PYOSRM"):
+			self.assertTrue(hasattr(config, "PYOSRM_FILE"))
+			self.assertTrue(os.path.exists(config.PYOSRM_FILE))
+
+	def test_config_ok_load_files_found(self):
+		self.assertTrue(hasattr(config, "ANTENNA_FILE"))
+		self.assertTrue(os.path.exists(config.ANTENNA_FILE))
+
+		self.assertTrue(hasattr(config, "TRIPS_FILE"))
+		self.assertTrue(os.path.exists(config.TRIPS_FILE))
+
+		self.assertTrue(hasattr(config, "TAZ_FILE"))
+		self.assertTrue(os.path.exists(config.TAZ_FILE))
+
+		self.assertTrue(hasattr(config, "OD_FILE"))
+		self.assertTrue(os.path.exists(config.OD_FILE))
+
+		self.assertTrue(hasattr(config, "MATSIM_FILE"))
+		self.assertTrue(os.path.exists(config.MATSIM_FILE))
+
+
+	def test_config_ok_computation_parameters(self):
+		self.assertTrue(hasattr(config, "MIN_ANTENNA_DIST"))
+		self.assertTrue(config.MIN_ANTENNA_DIST >= 1)
+		self.assertTrue(config.MIN_ANTENNA_DIST <= 10000)
+
+		self.assertTrue(hasattr(config, "MAX_CELLPATHS"))
+		self.assertTrue(config.MAX_CELLPATHS >= 1)
+		self.assertTrue(config.MAX_CELLPATHS <= 100)
+
+		self.assertTrue(hasattr(config, "ROUTE_ALGORITHM"))
+		self.assertTrue(config.ROUTE_ALGORITHM.upper() in ["SHORTEST", "LAZY", "STRICT"])
+		
+		self.assertTrue(hasattr(config, "SIMPLIFICATION_TOLERANCE"))
+		self.assertTrue(config.SIMPLIFICATION_TOLERANCE >= 0.01)
+		self.assertTrue(config.SIMPLIFICATION_TOLERANCE <= 0.1)		
 
 	def test_all_vertices_reachable(self):
 		sql = """WITH reachable_vertices AS (
@@ -136,6 +180,20 @@ class TestVerifyDBFast(unittest.TestCase):
 			covered_od_flow += self.cur.fetchone()[0]
 
 		self.assertAlmostEqual(total_od_flow, covered_od_flow)
+
+	def test_avg_number_segments_ok(self):
+		self.cur.execute("SELECT 1+AVG(segment_id) FROM cellpath_segment")
+		avg_num_segments = self.cur.fetchone()[0]
+		
+		#warning levels
+		if avg_num_segments < 1.5:
+			print("WARNING: Average number of segments very low (" + str(avg_num_segments) + "). You should probably lower the SIMPLIFICATION_TOLERANCE parameter!")
+		elif avg_num_segments > 6:
+			print("WARNING: Average number of segments very high (" + str(avg_num_segments) + "). You should probably increase the SIMPLIFICATION_TOLERANCE parameter!")
+
+		#critical levels
+		self.assertTrue(avg_num_segments > 1.2)
+		self.assertTrue(avg_num_segments < 12.0)
 
 	def test_route_lazy_all_flow_assigned(self):
 		self.validate_route_algo_all_flow_assigned("LAZY")

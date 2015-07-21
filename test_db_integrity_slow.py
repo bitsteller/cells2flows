@@ -3,6 +3,9 @@ import unittest
 
 import config, util
 
+print("INFO: Slow tests complement fast tests, make sure to also run fast tests!")
+print("Running slow tests (can take several hours)...")
+
 class TestVerifyDBSlow(unittest.TestCase):
 	"""Runs additional test on the complete dataset. These tests can take very long time to execute.
 	"""
