@@ -12,10 +12,10 @@ CREATE MATERIALIZED VIEW cellpath_dist AS
                                         FROM trips AS trips_all 
                                         WHERE trips_all.start_antenna = trips.start_antenna 
                                           AND trips_all.end_antenna = trips.end_antenna 
-                                          AND array_length(trips_all.cellpath,1) >= 3) 
+                                          AND array_length(trips_all.cellpath,1) >= 2) 
               AS share --probablity of the cellpath for the given cell od pair
     FROM trips
-    WHERE array_length(cellpath,1) >= 3
+    WHERE array_length(cellpath,1) >= 2
     GROUP BY trips.start_antenna, trips.end_antenna, cellpath
   )
   UNION
