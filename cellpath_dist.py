@@ -9,7 +9,3 @@ cur = conn.cursor()
 print("Creating cellpath distribution (takes a while)...")
 cur.execute(open("SQL/04_Routing_Network_Loading/create_cellpath_dist.sql", 'r').read())
 conn.commit()
-
-print("Creating simplified cellpaths (takes a while)...")
-cur.execute(open("SQL/04_Routing_Network_Loading/create_simple_cellpath.sql", 'r').read())
-conn.commit()
