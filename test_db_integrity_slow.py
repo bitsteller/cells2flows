@@ -27,6 +27,14 @@ class TestVerifyDBSlow(unittest.TestCase):
 		cellpaths_with_missing_segments = self.cur.fetchone()[0]
 		self.assertEqual(0, cellpaths_with_missing_segments)
 
+	def test_number_of_segments_correct(self):
+		sql = "	SELECT COUNT(*) \
+				FROM simple_cellpath AS scp \
+				WHERE array_length(scp.simple_cellpath,1) <> (SELECT COUNT(*) FROM cellpath_segment WHERE cellpath_segment.cellpath = scp.cellpath)" - 1
+		self.cur.execute(sql)
+		cellpaths_with_missing_or_extra_segments = self.cur.fetchone()[0]
+		self.assertEqual(0, cellpaths_with_missing_segments)	
+
 	def test_all_waypoints_found(self):
 		sql = "	SELECT COUNT(*) \
 				FROM od, LATERAL getTopCellpaths(od.orig_cell, od.dest_cell, 1) cp \
