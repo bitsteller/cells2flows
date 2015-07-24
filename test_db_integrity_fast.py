@@ -3,7 +3,7 @@ import unittest, os.path
 
 import config, util
 
-print("INFO: Not all data is verified, run slow tests additionally to run complete verification.")
+print("INFO: Not all data is verified, run slow tests additionally to run complete verification. Results may vary as verification samples are random.")
 print("Running fast tests (can take a few minutes)...")
 
 class TestVerifyDBFast(unittest.TestCase):

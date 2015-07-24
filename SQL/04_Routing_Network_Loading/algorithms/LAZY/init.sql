@@ -74,16 +74,3 @@ CREATE OR REPLACE FUNCTION routeLazy(integer[]) RETURNS integer[] AS $$
 		FROM segment, via, LATERAL routeSegmentLazy(via.points[segment_id+1], via.points[segment_id+2], segment.segment) AS linkid)
 	AS links;
 $$ LANGUAGE SQL STABLE;
-
-
-										 ) AS points
-					 FROM simple_cellpath AS scp
-					 WHERE scp.cellpath = $1),
-		segment AS (SELECT segment_id, segment 
-					FROM cellpath_segment
-					WHERE cellpath_segment.cellpath = $1
-					ORDER BY segment_id ASC)
-		SELECT via.points[segment_id+1], via.points[segment_id+2], segment.segment
-		FROM segment, via
-$$ LANGUAGE SQL STABLE;
-
