@@ -15,9 +15,11 @@ CREATE MATERIALIZED VIEW simple_cellpath AS
      FROM unnest(cellpaths.cellpath) cellid(cellid)) AS simple_geom
      FROM cellpaths)
   SELECT  cellpath_geom.cellpath, 
-      array_agg((SELECT ant_pos.id FROM ant_pos WHERE ant_pos.geom = simplified.geom)) AS simple_cellpath
-  FROM cellpath_geom, ST_DumpPoints(cellpath_geom.simple_geom) simplified
-  GROUP BY cellpath_geom.cellpath
+          (SELECT array_agg(ant_pos.id) 
+           FROM ST_DumpPoints(cellpath_geom.simple_geom) scpg
+           JOIN ant_pos ON ant_pos.geom = scpg.geom) AS simple_cellpath
+  FROM cellpath_geom
+  GROUP BY cellpath_geom.cellpath, cellpath_geom.simple_geom
 WITH DATA;
 
 CREATE INDEX idx_simple_cellpath_cellpath

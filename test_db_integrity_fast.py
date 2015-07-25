@@ -16,6 +16,7 @@ class TestVerifyDBFast(unittest.TestCase):
 		self.cur = self.conn.cursor()
 
 	def tearDown(self):
+		self.conn.commit()
 		self.conn.close()
 
 	def test_config_ok_general_settings(self):
@@ -80,7 +81,7 @@ class TestVerifyDBFast(unittest.TestCase):
 			print("Vertex " + str(vid) + " not reachable")
 		self.assertEqual(self.cur.rowcount, 0)
 
-	def test_road_networks_ok(self):
+	def test_road_network_ok(self):
 		sql = "	SELECT pgr_createTopology('hh_2po_4pgr', 0.000002, 'geom_way'); \
 				SELECT pgr_analyzeGraph('hh_2po_4pgr', 0.000002, 'geom_way');"
 		self.cur.execute(sql)
