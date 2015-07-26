@@ -8,4 +8,8 @@
 SELECT (route_with_waypoints(array_append(array_prepend(best_startpoint(ARRAY[orig_cell, dest_cell]), 
 														ARRAY[]::int[]), 
 														best_endpoint(ARRAY[orig_cell, dest_cell])))).edges AS links,
-	   flow AS flow FROM od
+	   flow AS flow 
+FROM od
+WHERE 	od.orig_cell = ANY(%(orig_cells)s)
+	AND od.dest_cell = ANY(%(dest_cells)s)
+	AND od.interval = %(interval)s

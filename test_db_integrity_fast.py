@@ -202,8 +202,8 @@ class TestVerifyDBFast(unittest.TestCase):
 	def test_route_strict_all_flow_assigned(self):
 		self.validate_route_algo_all_flow_assigned("STRICT")
 
-	#def test_route_shortest_all_flow_assigned(self):
-	#	self.validate_route_algo_all_flow_assigned("SHORTEST")
+	def test_route_shortest_all_flow_assigned(self):
+		self.validate_route_algo_all_flow_assigned("SHORTEST")
 
 	def validate_route_algo_all_flow_assigned(self, algorithm):
 		for od_data in util.get_random_od_data(50):
