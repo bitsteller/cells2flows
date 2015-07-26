@@ -66,6 +66,11 @@ CREATE INDEX idx_trips_end_antenna
   USING btree
   (end_antenna);
 
+CREATE INDEX idx_trips_user_id
+  ON public.trips
+  USING btree
+  (user_id);
+
 CREATE INDEX idx_trips_start_end_antenna
   ON public.trips
   USING btree
