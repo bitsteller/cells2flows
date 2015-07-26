@@ -11,7 +11,7 @@ CREATE MATERIALIZED VIEW simple_cellpath AS
              FROM unnest(cellpaths.cellpath) cellid(cellid)) AS geom,
      ( SELECT st_simplify(st_makeline(( SELECT ant_pos.geom
              FROM ant_pos
-            WHERE ant_pos.id = cellid.cellid)),$(tolerance)s) AS st_simplify
+            WHERE ant_pos.id = cellid.cellid)),%(tolerance)s) AS st_simplify
      FROM unnest(cellpaths.cellpath) cellid(cellid)) AS simple_geom
      FROM cellpaths)
   SELECT  cellpath_geom.cellpath, 

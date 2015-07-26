@@ -1,3 +1,4 @@
+--aggregates the matsim link counts (linkids from matsim_shapefile)
 DROP MATERIALIZED VIEW IF EXISTS matsim_count;
 CREATE MATERIALIZED VIEW matsim_count AS (
   WITH links AS (
