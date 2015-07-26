@@ -21,3 +21,6 @@ CREATE TABLE public.matsim
 WITH (
   OIDS=FALSE
 );
+
+CREATE INDEX matsim_user_id_idx ON matsim
+USING btree(user_id);
