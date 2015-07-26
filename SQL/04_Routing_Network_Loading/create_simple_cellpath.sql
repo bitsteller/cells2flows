@@ -3,7 +3,7 @@ DROP MATERIALIZED VIEW IF EXISTS simple_cellpath CASCADE;
 
 CREATE MATERIALIZED VIEW simple_cellpath AS 
   WITH cellpath_geom AS
-  (WITH cellpaths AS (SELECT DISTINCT cellpath FROM cellpath_dist LIMIT 1000)
+  (WITH cellpaths AS (SELECT DISTINCT cellpath FROM cellpath_dist)
   SELECT cellpaths.cellpath,
       ( SELECT st_makeline(( SELECT ant_pos.geom
                      FROM ant_pos
