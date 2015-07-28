@@ -1,4 +1,4 @@
-import psycopg2, signal, sys
+import psycopg2, signal, sys, os
 
 import util, config #local modules
 
@@ -29,7 +29,7 @@ def compare_routes(userid):
 	#add new cell at centroid of the cluster
 	cur.execute("SELECT cmp.similarity, cmp.extra_ms_points, cmp.extra_e_points \
 				 FROM compareRoutes((SELECT linkpath FROM matsim WHERE user_id = %(user_id)s), \
-									(SELECT routelazy((SELECT trips.cellpath FROM trips WHERE trips.user_id = %(user_id)s))) \
+									(SELECT route((SELECT trips.cellpath FROM trips WHERE trips.user_id = %(user_id)s))) \
 					 			   ) cmp"
 				, {"user_id": userid})
 	similarity, extra_ms_points, extra_e_points = cur.fetchone()
@@ -61,6 +61,16 @@ if __name__ == '__main__':
 	util.db_login()
 	mconn = util.db_connect()
 	mcur = mconn.cursor()
+
+	print("Creating route functions...")
+	mcur.execute(open("SQL/04_Routing_Network_Loading/create_route_functions.sql", 'r').read())
+	mconn.commit()
+
+	init_sql_filename = "SQL/04_Routing_Network_Loading/algorithms/" + config.ROUTE_ALGORITHM.upper() + "/init.sql"
+	if os.path.exists(init_sql_filename):
+		print("Initializing algorithm " + config.ROUTE_ALGORITHM + " (may take a while)...")
+		mcur.execute(open(init_sql_filename, 'r').read())
+		mconn.commit()
 
 	print("Creating compareRoutes() function...")
 	mcur.execute(open("SQL/05_Matsim_Compare/compare_routes.sql", 'r').read())
