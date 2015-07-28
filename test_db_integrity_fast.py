@@ -82,7 +82,7 @@ class TestVerifyDBFast(unittest.TestCase):
 		self.assertEqual(self.cur.rowcount, 0)
 
 	def test_road_network_ok(self):
-		sql = "	SELECT pgr_createTopology('hh_2po_4pgr', 0.000002, 'geom_way'); \
+		sql = "	SELECT pgr_createVerticesTable('hh_2po_4pgr', 'geom_way'); \
 				SELECT pgr_analyzeGraph('hh_2po_4pgr', 0.000002, 'geom_way');"
 		self.cur.execute(sql)
 		result = self.cur.fetchone()[0]
@@ -92,7 +92,7 @@ class TestVerifyDBFast(unittest.TestCase):
 		self.assertEqual("OK", result)
 
 	def test_road_network_simplified_ok(self):
-		sql = "	SELECT pgr_createTopology('hh_2po_4pgr_lite', 0.000002, 'geom_way'); \
+		sql = "	SELECT pgr_createVerticesTable('hh_2po_4pgr_lite', 'geom_way'); \
 				SELECT pgr_analyzeGraph('hh_2po_4pgr_lite', 0.000002, 'geom_way');"
 		self.cur.execute(sql)
 		result = self.cur.fetchone()[0]
