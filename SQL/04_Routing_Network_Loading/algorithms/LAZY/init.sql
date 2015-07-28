@@ -74,3 +74,7 @@ CREATE OR REPLACE FUNCTION routeLazy(integer[]) RETURNS integer[] AS $$
 		FROM segment, via, LATERAL routeSegmentLazy(via.points[segment_id+1], via.points[segment_id+2], segment.segment) AS linkid)
 	AS links;
 $$ LANGUAGE SQL STABLE;
+--make lazy voronoi the default routing algorithm
+CREATE OR REPLACE FUNCTION route(integer[]) RETURNS integer[] AS $$
+	SELECT routeLazy($1) AS links;
+$$ LANGUAGE SQL STABLE;
