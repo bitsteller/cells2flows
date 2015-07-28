@@ -5,9 +5,7 @@
 -- SHORTEST path routing just assigns the complete flow to the shortest path between origin and destination cell
 -- disregarding the cellpath data
 
-SELECT (route_with_waypoints(array_append(array_prepend(best_startpoint(ARRAY[orig_cell, dest_cell]), 
-														ARRAY[]::int[]), 
-														best_endpoint(ARRAY[orig_cell, dest_cell])))).edges AS links,
+SELECT routeShortest(ARRAY[od.orig_cell, od.dest_cell]) AS links,
 	   flow AS flow 
 FROM od
 WHERE 	od.orig_cell = ANY(%(orig_cells)s)

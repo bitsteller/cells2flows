@@ -11,7 +11,5 @@ WITH cellpath_flow AS (	SELECT od.orig_cell, od.dest_cell, cellpath, cellpath.sh
 							AND od.dest_cell = ANY(%(dest_cells)s)
 							AND od.interval = %(interval)s
 					   )
-SELECT (route_with_waypoints(array_append(array_prepend(best_startpoint(cellpath_flow.cellpath), 
-														get_waypoints(cellpath_flow.cellpath)), 
-														best_endpoint(cellpath_flow.cellpath)))).edges AS links,
+SELECT (routeStrict(cellpath_flow.cellpath) AS links,
 	   flow AS flow FROM cellpath_flow
