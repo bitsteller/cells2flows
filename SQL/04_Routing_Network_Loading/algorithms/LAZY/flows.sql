@@ -15,21 +15,3 @@ WITH cellpath_flow AS (	SELECT od.orig_cell, od.dest_cell, cellpath, cellpath.sh
 SELECT routeLazy(cellpath_flow.cellpath) AS links,
 	   flow AS flow 
 FROM cellpath_flow
-
-/*
-WITH loaded_links AS (
-	WITH cellpath_flow AS (	SELECT od.orig_cell, od.dest_cell, cellpath, cellpath.share * flow AS flow
-							FROM od, getTopCellpaths(od.orig_cell, od.dest_cell, %(max_cellpaths)s) cellpath
-							WHERE od.orig_cell = ANY(%(orig_cells)s)
-								AND od.dest_cell = ANY(%(dest_cells)s)
-								AND od.interval = %(interval)s
-						   )
-	SELECT 	od.orig_cell, 
-			od.dest_cell, 
-			routeLazy(cellpath_flow.cellpath) AS links,
-		   	flow AS flow
-	FROM cellpath_flow
-)
-SELECT links, flow FROM loaded_links
-GROUP BY od.orig_cell, od.dest_cell
-*/
