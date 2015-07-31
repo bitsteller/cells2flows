@@ -128,7 +128,7 @@ def calculate_od(args):
 	rows = [cur.mogrify("(%s, %s, %s, %s)", values) for values in data]
 
 	if len(rows) > 0:
-		sql = "INSERT INTO od (start_antenna, end_antenna, time_interval, trip_weight) \
+		sql = "INSERT INTO od (start_cell, end_cell, time_interval, trip_weight) \
 			   VALUES " + ", ".join(rows) + ";"
 		cur.execute(sql)
 		conn.commit()
