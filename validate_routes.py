@@ -1,5 +1,8 @@
 import psycopg2, signal, sys, os
 
+import numpy as np
+import matplotlib.pyplot as plt
+
 import util, config #local modules
 
 """
@@ -10,7 +13,7 @@ Prerequisites:
 	* run all steps in run_experiment.py
 """
 
-SAMPLESIZE = 200
+SAMPLESIZE = 1000
 
 def init():
 	global conn, cur
@@ -56,19 +59,10 @@ mapper = None
 cur = None
 conn = None
 
-if __name__ == '__main__':
-	signal.signal(signal.SIGINT, signal_handler) #abort on CTRL-C
-	util.db_login()
-	mconn = util.db_connect()
-	mcur = mconn.cursor()
-
-	print("Creating route functions...")
-	mcur.execute(open("SQL/04_Routing_Network_Loading/create_route_functions.sql", 'r').read())
-	mconn.commit()
-
-	init_sql_filename = "SQL/04_Routing_Network_Loading/algorithms/" + config.ROUTE_ALGORITHM.upper() + "/init.sql"
+def validate_agorithm(algo):
+	init_sql_filename = "SQL/04_Routing_Network_Loading/algorithms/" + algo + "/init.sql"
 	if os.path.exists(init_sql_filename):
-		print("Initializing algorithm " + config.ROUTE_ALGORITHM + " (may take a while)...")
+		print("Initializing algorithm " + algo + " (may take a while)...")
 		mcur.execute(open(init_sql_filename, 'r').read())
 		mconn.commit()
 
@@ -82,9 +76,61 @@ if __name__ == '__main__':
 	print("Comparing " + str(SAMPLESIZE) + " randomly selected routes...")
 	mapper = util.ParMap(compare_routes, initializer = init)
 	results = mapper(user_id_generator, length = SAMPLESIZE)
+	mapper.stop()
 	results = [r for r in results if r != None] #trip null values
 
-	print("Average similarity: " + str(average([r["similarity"] for r in results])))
+	mean = average([r["similarity"] for r in results])
+	std = np.std(np.array([r["similarity"] for r in results]))
+
+	print("Average similarity: " + str(mean) + " (std: " + str(std) + ")")
 	print("Average extra points in MATSim route: " + str(average([r["extra_ms_points"] for r in results])))
 	print("Average extra points in estimated route: " + str(average([r["extra_e_points"] for r in results])))
+
+	return mean, std
+
+def plot_results(means, stds, labels):
+	ind = np.arange(len(labels))  # the x locations for the groups
+	width = 0.5       # the width of the bars
+
+	fig, ax = plt.subplots()
+	rects1 = ax.bar(ind + 0.25, means, width, color='r', yerr=stds)
+
+	# add some text for labels, title and axes ticks
+	ax.set_ylabel('Route recoverage')
+	ax.set_title('Similarity of estimated routes to MATSim routes')
+	ax.set_xticks(ind+width)
+	ax.set_xticklabels( tuple(labels) )
+	
+	plt.ylim(ymin = 0.0, ymax = 1.0)
+
+	def autolabel(rects):
+	    # attach some text labels
+	    for rect in rects:
+	        height = rect.get_height()
+	        ax.text(rect.get_x()+rect.get_width()/2., 1.05*height, str("{:10.2f}".format(height)),
+	                ha='center', va='bottom')
+
+	autolabel(rects1)
+	plt.show()
+
+if __name__ == '__main__':
+	signal.signal(signal.SIGINT, signal_handler) #abort on CTRL-C
+	util.db_login()
+	mconn = util.db_connect()
+	mcur = mconn.cursor()
+
+	print("Creating route functions...")
+	mcur.execute(open("SQL/04_Routing_Network_Loading/create_route_functions.sql", 'r').read())
+	mconn.commit()
+
+	means = []
+	stds = []
+	labels = []
+	for algo in ["shortest", "strict", "lazy"]:
+		mean, std = validate_agorithm(algo)
+		means.append(mean)
+		stds.append(std)
+		labels.append(algo)
+
+	plot_results(means, stds, labels)
 
