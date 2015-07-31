@@ -161,8 +161,8 @@ if __name__ == '__main__':
 
 	#calculate OD flows
 	print("Calculating OD flows...")
-	args = ((o, d) for o, d in util.od_chunks(2))
-	mapper = util.MapReduce(fetch_trips, calculate_od, num_workers = 25)
-	mapper(args, pipe = True, length = len(config.CELLS)*len(config.CELLS)/200 + len(config.CELLS))
+	args = ((o, d) for o, d in util.od_chunks(5))
+	mapper = util.MapReduce(fetch_trips, calculate_od)
+	mapper(args, pipe = True, length = len(config.CELLS)*len(config.CELLS)/5 + len(config.CELLS))
 
 	#calculate_od((1,5,timedist)) #test
