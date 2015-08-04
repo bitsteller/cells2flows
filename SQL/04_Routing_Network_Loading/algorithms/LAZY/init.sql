@@ -26,16 +26,16 @@ CREATE OR REPLACE FUNCTION routeSegmentLazy(integer, integer, integer[]) RETURNS
  							source, 
  							target, 
  							(CASE WHEN EXISTS(SELECT * FROM preferred_links WHERE preferred_links.id = hh_2po_4pgr_lite.id) THEN
- 								0.5*cost
+ 								0.01*cost
  							WHEN EXISTS(SELECT * FROM preferrable_links WHERE preferrable_links.id = hh_2po_4pgr_lite.id) THEN
- 								0.8*cost
+ 								1.0*cost
  							ELSE
  								cost
  							END) AS cost,
  							(CASE WHEN EXISTS(SELECT * FROM preferred_links WHERE preferred_links.id = hh_2po_4pgr_lite.id) THEN
- 								0.5*reverse_cost
+ 								0.01*reverse_cost
  							WHEN EXISTS(SELECT * FROM preferrable_links WHERE preferrable_links.id = hh_2po_4pgr_lite.id) THEN
- 								0.8*reverse_cost
+ 								1.0*reverse_cost
  							ELSE
  								reverse_cost
  							END) AS reverse_cost --,
@@ -60,9 +60,9 @@ $$ LANGUAGE plpgsql STABLE; --TODO: parameterize SRID
 -- waypoints and modified cost on links inside visited cells)
 CREATE OR REPLACE FUNCTION routeLazy(integer[]) RETURNS integer[] AS $$
 	SELECT array_agg(linkid) FROM
-		(WITH via AS (SELECT array_append(array_prepend((SELECT junction_id FROM get_candidate_junctions($1[array_lower($1,1)]) ORDER BY random() LIMIT 1),--best_startpoint($1), 
+		(WITH via AS (SELECT array_append(array_prepend(best_startpoint($1), --(SELECT junction_id FROM get_candidate_junctions($1[array_lower($1,1)]) ORDER BY random() LIMIT 1),--
 													   get_waypoints(scp.simple_cellpath)), 
-													   (SELECT junction_id FROM get_candidate_junctions($1[array_upper($1,1)]) ORDER BY random() LIMIT 1)--best_endpoint($1)
+													   best_endpoint($1) --(SELECT junction_id FROM get_candidate_junctions($1[array_upper($1,1)]) ORDER BY random() LIMIT 1)--
 										 ) AS points
 					 FROM simple_cellpath AS scp
 					 WHERE scp.cellpath = $1),
@@ -74,6 +74,16 @@ CREATE OR REPLACE FUNCTION routeLazy(integer[]) RETURNS integer[] AS $$
 		FROM segment, via, LATERAL routeSegmentLazy(via.points[segment_id+1], via.points[segment_id+2], segment.segment) AS linkid)
 	AS links;
 $$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION debug_routeLazy(integer[]) RETURNS integer[] AS $$
+SELECT array_append(array_prepend(best_startpoint($1), --(SELECT junction_id FROM get_candidate_junctions($1[array_lower($1,1)]) ORDER BY random() LIMIT 1),--
+													   get_waypoints(scp.simple_cellpath)), 
+													   best_endpoint($1) --(SELECT junction_id FROM get_candidate_junctions($1[array_upper($1,1)]) ORDER BY random() LIMIT 1)--
+										 ) AS points
+					 FROM simple_cellpath AS scp
+					 WHERE scp.cellpath = $1
+$$ LANGUAGE SQL STABLE;
+
 --make lazy voronoi the default routing algorithm
 CREATE OR REPLACE FUNCTION route(integer[]) RETURNS integer[] AS $$
 	SELECT routeLazy($1) AS links;
