@@ -30,18 +30,18 @@ def compare_routes(userid):
 	global conn, cur
 
 	#add new cell at centroid of the cluster
-	cur.execute("SELECT cmp.similarity, cmp.extra_ms_points, cmp.extra_e_points \
+	cur.execute("SELECT cmp.similarity, cmp.common_points, cmp.extra_ms_points, cmp.extra_e_points \
 				 FROM compareRoutes((SELECT linkpath FROM matsim WHERE user_id = %(user_id)s), \
 									(SELECT route((SELECT trips.cellpath FROM trips WHERE trips.user_id = %(user_id)s))) \
 					 			   ) cmp"
 				, {"user_id": userid})
-	similarity, extra_ms_points, extra_e_points = cur.fetchone()
+	similarity, common_points, extra_ms_points, extra_e_points = cur.fetchone()
 
 	if similarity == None:
 		print("WARNING: could not compare routes for user " + str(userid))
 		return None
 	else:
-		return {"similarity": similarity, "extra_ms_points": extra_ms_points, "extra_e_points": extra_e_points}
+		return {"similarity": similarity, "common_points": common_points, "extra_ms_points": extra_ms_points, "extra_e_points": extra_e_points}
 
 def signal_handler(signal, frame):
 	global mapper, request_stop
@@ -82,11 +82,16 @@ def validate_agorithm(algo):
 	mean = average([r["similarity"] for r in results])
 	std = np.std(np.array([r["similarity"] for r in results]))
 
-	print("Average similarity: " + str(mean) + " (std: " + str(std) + ")")
-	print("Average extra points in MATSim route: " + str(average([r["extra_ms_points"] for r in results])))
-	print("Average extra points in estimated route: " + str(average([r["extra_e_points"] for r in results])))
+	mean_common = average([r["common_points"] for r in results])
+	mean_extra_ms = average([r["extra_ms_points"] for r in results])
+	mean_extra_e = average([r["extra_e_points"] for r in results])
 
-	return mean, std
+	print("Average similarity: " + str(mean) + " (std: " + str(std) + ")")
+	print("Average common points in MATSim route: " + str(mean_common))
+	print("Average extra points in MATSim route: " + str(mean_extra_ms))
+	print("Average extra points in estimated route: " + str(mean_extra_e))
+
+	return mean, std, mean_common, mean_extra_ms, mean_extra_e
 
 def plot_results(means, stds, labels):
 	ind = np.arange(len(labels))  # the x locations for the groups
@@ -101,17 +106,46 @@ def plot_results(means, stds, labels):
 	ax.set_xticks(ind+width)
 	ax.set_xticklabels( tuple(labels) )
 	
-	plt.ylim(ymin = 0.0, ymax = 1.0)
+	plt.ylim(ymin = 0, ymax = 1.0)
 
 	def autolabel(rects):
 	    # attach some text labels
 	    for rect in rects:
 	        height = rect.get_height()
-	        ax.text(rect.get_x()+rect.get_width()/2., 1.05*height, str("{:10.2f}".format(height)),
+	        ax.text(rect.get_x()+0.6*rect.get_width(), 1.05*height, str("{:10.2f}".format(height)),
 	                ha='center', va='bottom')
 
 	autolabel(rects1)
-	plt.show()
+
+def plot_points(means_common, means_extra_ms, mean_extra_e, labels):
+	ind = np.arange(len(labels))  # the x locations for the groups
+	width = 0.2       # the width of the bars
+
+	fig, ax = plt.subplots()
+	rects1 = ax.bar(ind + 0.2, means_extra_ms, width, color='r')
+	rects2 = ax.bar(ind + 0.4, means_common, width, color='g')
+	rects3 = ax.bar(ind + 0.6, means_extra_e, width, color='b')
+
+	# add some text for labels, title and axes ticks
+	ax.set_ylabel('Number of points')
+	ax.set_title('Point comparison')
+	ax.set_xticks(ind+3*width)
+	ax.set_xticklabels( tuple(labels) )
+	
+	plt.ylim(ymin = 0, ymax = 100)
+
+	plt.figlegend( (rects1, rects2, rects3), ('Unique in MATSim route', 'Common points', 'Unique in estimated route'), 'upper right' )
+
+	def autolabel(rects):
+	    # attach some text labels
+	    for rect in rects:
+	        height = rect.get_height()
+	        ax.text(rect.get_x()+0.6*rect.get_width(), 1.05*height, str(int(height)),
+	                ha='center', va='bottom')
+
+	autolabel(rects1)
+	autolabel(rects2)
+	autolabel(rects3)
 
 if __name__ == '__main__':
 	signal.signal(signal.SIGINT, signal_handler) #abort on CTRL-C
@@ -126,11 +160,19 @@ if __name__ == '__main__':
 	means = []
 	stds = []
 	labels = []
+	means_common = []
+	means_extra_ms = []
+	means_extra_e = []
 	for algo in ["shortest", "strict", "lazy"]:
-		mean, std = validate_agorithm(algo)
+		mean, std, mean_common, mean_extra_ms, mean_extra_e = validate_agorithm(algo)
 		means.append(mean)
 		stds.append(std)
 		labels.append(algo)
+		means_common.append(mean_common)
+		means_extra_ms.append(mean_extra_ms)
+		means_extra_e.append(mean_extra_e)
 
 	plot_results(means, stds, labels)
+	plot_points(means_common, means_extra_ms, means_extra_e, labels)
+	plt.show()
 
