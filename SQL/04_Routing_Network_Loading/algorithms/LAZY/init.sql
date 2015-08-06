@@ -1,7 +1,7 @@
 DROP MATERIALIZED VIEW IF EXISTS voronoi_extended;
 
 CREATE MATERIALIZED VIEW voronoi_extended AS
-	SELECT id, ST_Transform(ST_Buffer(ST_Transform(voronoi.geom,3857), 500),4326) geom
+	SELECT id, ST_Transform(ST_Buffer(ST_Transform(voronoi.geom,3857), %(extdist)),4326) geom
 	FROM voronoi
 WITH DATA;
 
@@ -26,16 +26,16 @@ CREATE OR REPLACE FUNCTION routeSegmentLazy(integer, integer, integer[]) RETURNS
  							source, 
  							target, 
  							(CASE WHEN EXISTS(SELECT * FROM preferred_links WHERE preferred_links.id = hh_2po_4pgr_lite.id) THEN
- 								0.01*cost
+ 								%(alpha)*cost
  							WHEN EXISTS(SELECT * FROM preferrable_links WHERE preferrable_links.id = hh_2po_4pgr_lite.id) THEN
- 								1.0*cost
+ 								%(beta)*cost
  							ELSE
  								cost
  							END) AS cost,
  							(CASE WHEN EXISTS(SELECT * FROM preferred_links WHERE preferred_links.id = hh_2po_4pgr_lite.id) THEN
- 								0.01*reverse_cost
+ 								%(alpha)*reverse_cost
  							WHEN EXISTS(SELECT * FROM preferrable_links WHERE preferrable_links.id = hh_2po_4pgr_lite.id) THEN
- 								1.0*reverse_cost
+ 								%(beta)*reverse_cost
  							ELSE
  								reverse_cost
  							END) AS reverse_cost --,

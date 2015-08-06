@@ -70,7 +70,7 @@ if __name__ == '__main__':
 	init_sql_filename = "SQL/04_Routing_Network_Loading/algorithms/" + config.ROUTE_ALGORITHM.upper() + "/init.sql"
 	if os.path.exists(init_sql_filename):
 		print("Initializing algorithm " + config.ROUTE_ALGORITHM + " (may take a while)...")
-		mcur.execute(open(init_sql_filename, 'r').read())
+		mcur.execute(open(init_sql_filename, 'r').read(), config.ALGO_PARAMS)
 		mconn.commit()
 	flows_sql = open("SQL/04_Routing_Network_Loading/algorithms/" + config.ROUTE_ALGORITHM.upper() + "/flows.sql", 'r').read()
 

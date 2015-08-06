@@ -63,7 +63,7 @@ def validate_agorithm(algo):
 	init_sql_filename = "SQL/04_Routing_Network_Loading/algorithms/" + algo + "/init.sql"
 	if os.path.exists(init_sql_filename):
 		print("Initializing algorithm " + algo + " (may take a while)...")
-		mcur.execute(open(init_sql_filename, 'r').read())
+		mcur.execute(open(init_sql_filename, 'r').read(), config.ALGO_PARAMS)
 		mconn.commit()
 
 	print("Creating compareRoutes() function...")
