@@ -26,16 +26,16 @@ CREATE OR REPLACE FUNCTION routeSegmentLazy(integer, integer, integer[]) RETURNS
  							source, 
  							target, 
  							(CASE WHEN EXISTS(SELECT * FROM preferred_links WHERE preferred_links.id = hh_2po_4pgr_lite.id) THEN
- 								' %(alpha)s '*cost
+ 								' || %(alpha)s || '*cost
  							WHEN EXISTS(SELECT * FROM preferrable_links WHERE preferrable_links.id = hh_2po_4pgr_lite.id) THEN
- 								' %(beta)s '*cost
+ 								' || %(beta)s || '*cost
  							ELSE
  								cost
  							END) AS cost,
  							(CASE WHEN EXISTS(SELECT * FROM preferred_links WHERE preferred_links.id = hh_2po_4pgr_lite.id) THEN
- 								' %(alpha)s '*reverse_cost
+ 								' || %(alpha)s || '*reverse_cost
  							WHEN EXISTS(SELECT * FROM preferrable_links WHERE preferrable_links.id = hh_2po_4pgr_lite.id) THEN
- 								' %(beta)s '*reverse_cost
+ 								' || %(beta)s || '*reverse_cost
  							ELSE
  								reverse_cost
  							END) AS reverse_cost --,
