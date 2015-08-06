@@ -3,7 +3,7 @@ DROP INDEX IF EXISTS idx_trips_start_antenna;
 DROP INDEX IF EXISTS idx_trips_end_antenna;
 DROP INDEX IF EXISTS idx_trips_start_end_antenna;
 DROP TABLE IF EXISTS public.trips CASCADE;
-DROP SEQUENCE IF EXISTS public.trips_id_seq;
+DROP SEQUENCE IF EXISTS public.trips_id_seq CASCADE;
 
 --Create ant_pos table and index
 CREATE SEQUENCE public.trips_id_seq
