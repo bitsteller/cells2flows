@@ -136,7 +136,7 @@ if __name__ == '__main__':
 	#get number of remaining segments to calculate
 	sql_remaining = """
 		SELECT COUNT(DISTINCT cellpath[1:2])
-		FROM cellpath_dist
+		FROM ((SELECT cellpath FROM cellpath_dist) UNION (SELECT ARRAY[orig_cell, dest_cell] AS cellpath FROM od)) AS cellpaths --include direct cellpaths for shortest algorithm
 		WHERE 	array_length(cellpath, 1) >= 2 AND
 				NOT EXISTS(SELECT * FROM best_startpoint WHERE best_startpoint.part = cellpath[1:2])
 	"""
@@ -146,7 +146,7 @@ if __name__ == '__main__':
 
 	startparts = fetch_parts("""
 		SELECT DISTINCT cellpath[1:2]
-		FROM cellpath_dist
+		FROM ((SELECT cellpath FROM cellpath_dist) UNION (SELECT ARRAY[orig_cell, dest_cell] AS cellpath FROM od)) AS cellpaths --include direct cellpaths for shortest algorithm
 		WHERE 	array_length(cellpath, 1) >= 2 AND
 				NOT EXISTS(SELECT * FROM best_startpoint WHERE best_startpoint.part = cellpath[1:2])""")
 
@@ -159,7 +159,7 @@ if __name__ == '__main__':
 	#get number of remaining segments to calculate
 	sql_remaining = """
 		SELECT COUNT(DISTINCT cellpath[array_upper(cellpath,1)-1:array_upper(cellpath,1)])
-		FROM cellpath_dist
+		FROM ((SELECT cellpath FROM cellpath_dist) UNION (SELECT ARRAY[orig_cell, dest_cell] AS cellpath FROM od)) AS cellpaths --include direct cellpaths for shortest algorithm
 		WHERE 	array_length(cellpath, 1) >= 2 AND
 				NOT EXISTS(SELECT * FROM best_endpoint WHERE best_endpoint.part = cellpath[array_upper(cellpath,1)-1:array_upper(cellpath,1)])"""
 	mcur.execute(sql_remaining)
@@ -168,7 +168,7 @@ if __name__ == '__main__':
 
 	endparts = fetch_parts("""
 		SELECT DISTINCT cellpath[array_upper(cellpath,1)-1:array_upper(cellpath,1)]
-		FROM cellpath_dist
+		FROM ((SELECT cellpath FROM cellpath_dist) UNION (SELECT ARRAY[orig_cell, dest_cell] AS cellpath FROM od)) AS cellpaths --include direct cellpaths for shortest algorithm
 		WHERE 	array_length(cellpath, 1) >= 2 AND
 				NOT EXISTS(SELECT * FROM best_endpoint WHERE best_endpoint.part = cellpath[array_upper(cellpath,1)-1:array_upper(cellpath,1)])""")
 
