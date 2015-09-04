@@ -7,6 +7,10 @@ import numpy #for vector/matrix computations
 
 import util, config #local modules
 
+WEEKDAYS = [1,2,3,4] #array of weekdays to consider trips from (0=sunday,...6=saturday)
+SPEED = 50 #average travel speed (km/h) assumed in order to calculate the latest possible start time of the trip
+MAX_INTERVAL = 60 #the maximum duration of the trip start interval (minutes) to consider the trip well-defined 
+
 def fetch_timedist():
 	"""Fetches the time distribution of trips from the database by counting 
 	the number of starting trips in every 10min interval of the day.
@@ -19,13 +23,13 @@ def fetch_timedist():
 	conn = util.db_connect()
 	cur = conn.cursor()
 
-	cur.execute("SELECT EXTRACT(HOUR FROM trips.start_time)*6 + EXTRACT(MINUTE FROM trips.start_time)/10 AS interval, COUNT(*) AS count\
-				 FROM trips \
-				 WHERE date_part('DOW', trips.start_time) BETWEEN 1 AND 4\
-				 AND EXTRACT('EPOCH' FROM (TIMESTAMP WITHOUT TIME ZONE 'epoch' + (EXTRACT('EPOCH' FROM end_time) - 3600*distance/50) * INTERVAL '1 second') - start_time)/60 < 60 \
-				 GROUP BY EXTRACT(HOUR FROM trips.start_time), EXTRACT(MINUTE FROM trips.start_time) \
-				 ORDER BY EXTRACT(HOUR FROM trips.start_time), EXTRACT(MINUTE FROM trips.start_time)")
-
+	cur.execute(open("SQL/03_Scaling_OD/trip_timedist.sql", 'r').read(),
+					{ 	"weekdays": WEEKDAYS,
+						"speed": SPEED,
+						"maxinterval": MAX_INTERVAL
+					}
+				)
+	
 	timedist = [None] * 24*6
 	for interval, count in cur.fetchall():
 		timedist[int(interval)] = count
