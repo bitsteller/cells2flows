@@ -109,9 +109,9 @@ All configuration parameters are set in the file `config.py`. The available para
 - `MIN_ANTENNA_DIST`: min distance between antennas in meteres (antennas with a smaller distance are merged during clustering)
 - `MAX_CELLPATHS`: the maxium number of cellpaths to use for each OD pair, only the `MAX_CELLPATHS` most likeley cellpaths (larger value = more accurate, smaller value=faster computation); recommended value: 10
 - `ROUTE_ALGORITHM`: route algorithm to use during network loading, supportet algorithms are "LAZY" (Lazy Voronoi Routing), "STRICT" (Strict Voronoi Routing), "SHORTEST" (shortest path between start and destination cell)
-- `ALGO_PARAMS`: algorithm specific paramters given as a dictionary (are passed to the flows.sql query of the chosen algorithm). The `LAZY` algorithm needs the following paramters to be set: `alpha` (cost factor for visited cells), `beta` (cost factor for buffer around visited cells)`, `extdist` (buffer distance in meters). Example how to set `ALGO_PARAMS`:
+- `ALGO_PARAMS`: algorithm specific paramters given as a dictionary (are passed to the flows.sql query of the chosen algorithm). The `LAZY` algorithm needs the following paramters to be set: `alpha` (cost factor for visited cells), `beta` (cost factor for buffer around visited cells), `extdist` (buffer distance in meters). Example how to set `ALGO_PARAMS`:
 
-	ALGO_PARAMS = {"alpha": "0.01", "beta": "1.0", "extdist": 500}
+		ALGO_PARAMS = {"alpha": "0.01", "beta": "1.0", "extdist": 500}
 	
 - `CELLS` (optional):  a sequence of cell ids to use for the computation, be careful that after antenna clustering ids might change. If the this paramter is omitted, all cells are used by default.
 - `TRIPS` (optional): trip ids to use, if not set all loaded trips are used
