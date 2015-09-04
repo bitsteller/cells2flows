@@ -62,17 +62,11 @@ Instead of running osrm as a server the pyosrm wrapper library can be used. In t
 	
 # Install python packages
 
-Install the following python libraries using pip:
+Install all necessary python libraries using `pip` and the `requirements.txt` file inside the `/doc` folder:
 
-	pip install $name_of_the_library
+	pip install -r requirements.txt
 	
-* numpy
-* scipy
-* matplotlib
-* urllib2
-* psycopg2
-* geopy
-* keyring (optional)
+Installing the `keyring` library is optional.
 	
 # Adjust parsing functions
 
@@ -133,7 +127,7 @@ The following experiments are available:
 # Run tests
 To run unit tests on the the util.py module:
 	
-		python -m unittest test_util
+	python -m unittest test_util
 		
 After run_experiments.py has finished with all steps, you can verify the (intermediate) results in the database. To run fast tests (some test only check a random sample of the data) use 
 

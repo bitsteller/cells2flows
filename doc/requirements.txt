@@ -1,0 +1,8 @@
+Cython>=0.22
+numpy>=1.9.2
+psycopg2>=2.6
+scipy>=0.15.1
+urllib3>=1.10.1
+matplotlib>=1.4.3
+geopy>=1.10.0
+keyring>=5.0
