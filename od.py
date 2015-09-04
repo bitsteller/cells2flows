@@ -29,7 +29,7 @@ def fetch_timedist():
 						"maxinterval": MAX_INTERVAL
 					}
 				)
-	
+
 	timedist = [None] * 24*6
 	for interval, count in cur.fetchall():
 		timedist[int(interval)] = count
@@ -49,24 +49,19 @@ def fetch_trips(args):
 	"""
 
 	o, d = args #arguments are passed as tuple due to pool.map() limitations
-	#print(str(o) + "->" + str(d) + " started")
 	start = time.time()
 
 	conn = util.db_connect()
 	cur = conn.cursor()
 
 	#fetch all trips
-	trips_sql = "SELECT start_antenna, \
-						end_antenna, \
-						trip_scale_factor,\
-				 		EXTRACT(EPOCH FROM start_time) AS start, \
-				 		EXTRACT(EPOCH FROM end_time) AS end, \
-				 		EXTRACT(EPOCH FROM end_time) - 3600*distance/50 AS start_interval_end \
-				 FROM trips_with_factors \
-				 WHERE start_antenna IN %s AND end_antenna IN %s \
-				 AND EXTRACT(DOW FROM start_time) BETWEEN 1 AND 4"
-
-	cur.execute(trips_sql, (tuple(o),tuple(d)))
+	cur.execute(open("SQL/03_Scaling_OD/fetch_trips.sql", 'r').read(), 
+					{ 	"weekdays": WEEKDAYS,
+						"speed": SPEED,
+						"orig_cells": o,
+						"dest_cells": d
+					}
+				)
 
 	result = []
 	for origin, destination, trip_scale_factor, start_time, end_time, start_interval_end in cur.fetchall():
