@@ -119,9 +119,14 @@ All configuration parameters are set in the file `config.py`. The available para
 
 # Run the full traffic assignment procedure
 	
-When you performed all the previous steps , you can run the whole pipleline through:
+When you performed all the previous steps , you can run each experiment through:
 
-	python run_experiment.py
+	python run_experiment.py $experiment
+	
+The following experiments are available:
+	* `sstem`: Runs a network loading from SSTEM data. The hh_2po_4pgr table has to be existent and filled with data. All remaining data is read from the files given in the configuration and loaded into the database. The given OD is converted into a cell based matrix and then the cellpath routing and network loading components are used to calculate the link flows.
+	* `routevalidation`: Validates 1000 randomly selected routes based on SSTEM data. Additionally routes from MATSim are read and compared with the routes estimated from the SSTEM data. The result is presented as diagrams and printed on console.
+	* `full`: Runs the full procedure except the trip extraction. The hh_2po_4pgr, trips and ant_pos tables have to be existent and filled with data already. Runs the OD matrix estimation, cellpath routing and network loading components to calcualte the link flows.
 	
 *Warning*: Be aware that when you run the process from the beginning all previously calculated data will be deleted from the database.
 	
