@@ -16,6 +16,7 @@ MATSIM_FILE = "path/to/RouteSequences_1M.csv"
 MIN_ANTENNA_DIST = 500 #min distance between antennas in meters (antennas with a smaller distance are merged during clustering)
 MAX_CELLPATHS = 5 #use only the top n cellpath by flow in each OD pair, other cellpaths are disregarded during network loading (lower=faster, higher=more accurate)
 ROUTE_ALGORITHM = "LAZY" #STRICT = use Strict Voronoi Routing, LAZY = use Lazy Voronoi Routing, SHORTEST = use shortest path between start and destination only
+ALGO_PARAMS = {"alpha": "0.01", "beta": "1.0", "extdist": 500}
 #CELLS = [4,363] #cell ids to use range(mincell, maxcellid+1), if not set all cells in ant_pos table are used
 #TRIPS = range(0,1000000) #trip ids to use, if not set all loaded trips are used
 
