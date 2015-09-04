@@ -14,9 +14,9 @@ preparations = [ "install and init a postgres database",
 
 experiments = {
 		"sstem": [
-					("Loading antenna data", "load_antennas.py"),
-					("Loading trip data", "load_trips.py"),
-					("Loading TAZ and OD data", "load_taz_od.py"),
+					("Load antenna data", "load_antennas.py"),
+					("Load trip data", "load_trips.py"),
+					("Load TAZ and OD data", "load_taz_od.py"),
 					("Backup original antenna and trip data", "backup_original.py"),
 					("Cluster antennas and preprocess trips", "cluster_antennas.py"), #comment out, if you want to keep original antennas
 					("Calculate Voronoi diagram", "voronoi.py"),
@@ -29,9 +29,9 @@ experiments = {
 					("Loading network", "network_loading.py")
 				 ],
 		"routevalidation": [
-					("Loading antenna data", "load_antennas.py"),
-					("Loading trip data", "load_trips.py"),
-					("Loading TAZ and OD data", "load_taz_od.py"),
+					("Load antenna data", "load_antennas.py"),
+					("Load trip data", "load_trips.py"),
+					("Load TAZ and OD data", "load_taz_od.py"),
 					("Backup original antenna and trip data", "backup_original.py"),
 					("Cluster antennas and preprocess trips", "cluster_antennas.py"), #comment out, if you want to keep original antennas
 					("Calculate Voronoi diagram", "voronoi.py"),
@@ -41,6 +41,7 @@ experiments = {
 					("Segmentize cellpaths (for lazy Voronoi routing)", "segmentize_cellpaths.py"),
 					("Calculate start/endpoints", "best_points.py"),
 					("Calculate waypoints", "waypoints.py"),
+					("Load MATSim routes", "load_matsim.py"),
 					("Validate routes", "validate_routes.py")
 						   ],
 		"full": [
