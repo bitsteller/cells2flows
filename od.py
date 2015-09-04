@@ -1,5 +1,4 @@
-#DEPRECATED: This script is deprecated as OD calculation is no longer part of cells2flows, will become a seperate project
-
+# Estimates the travel demand (OD matrix) from scaled trips
 
 import time, signal, json, random, itertools, math, sys
 from multiprocessing import Pool, Manager
