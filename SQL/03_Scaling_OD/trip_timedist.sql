@@ -1,4 +1,4 @@
-﻿--fetches the trip-time distribute of all well-defined trips
+--fetches the trip-time distribute of all well-defined trips
 -- %(weekdays)s array of weekdays to consider trips from (0=sunday,...6=saturday)
 -- %(speed)s average travel speed (km/h) assumed in order to calculate the latest possible start time of the trip
 -- %(maxinterval)s the maximum duration of the trip start interval (minutes) to consider the trip well-defined 

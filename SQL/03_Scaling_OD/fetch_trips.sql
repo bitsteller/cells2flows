@@ -1,4 +1,4 @@
-﻿--fetches the trip data necessary for OD estimation
+--fetches the trip data necessary for OD estimation
 -- %(weekdays)s array of weekdays to consider trips from (0=sunday,...6=saturday)
 -- %(speed)s average travel speed (km/h) assumed in order to calculate the latest possible start time of the trip
 
