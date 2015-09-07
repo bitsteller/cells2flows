@@ -10,7 +10,7 @@ CREATE MATERIALIZED VIEW cell_factors AS
   ORDER BY homebase.user_id
 ) WITH DATA;
 
-COMMENT ON MATERIALIZED VIEW cell_factors 
+COMMENT ON MATERIALIZED VIEW cell_factors IS
 "Assumes that users inactive over the course of a day and people not in the data have the same behaviour as the sample of active users (those that made a trip on that day). 
 
 active_share(cell, day) = users_with_trip/homebase_count
