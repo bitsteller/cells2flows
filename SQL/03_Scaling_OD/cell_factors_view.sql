@@ -1,4 +1,4 @@
-﻿DELETE MATERIALIZED VIEW IF EXISTS cell_factors;
+DELETE MATERIALIZED VIEW IF EXISTS cell_factors;
 CREATE MATERIALIZED VIEW cell_factors AS
 (
  SELECT homebase.antenna_id,
