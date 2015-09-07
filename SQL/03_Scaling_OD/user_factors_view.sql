@@ -11,10 +11,10 @@ CREATE MATERIALIZED VIEW cell_factors AS
 ) WITH DATA;
 
 COMMENT ON MATERIALIZED VIEW cell_factors IS
-"Assumes that users inactive over the course of a day and people not in the data have the same behaviour as the sample of active users (those that made a trip on that day). 
+'Assumes that users inactive over the course of a day and people not in the data have the same behaviour as the sample of active users (those that made a trip on that day). 
 
 active_share(cell, day) = users_with_trip/homebase_count
 trip_scale_factor(cell, day) = 1/active_share * cell_population/homebase_count
 trip_scale_factor(user, day) = trip_scale_factor(user_homebase, day)
 
-Uses cell_factors, homebase.";
+Uses cell_factors, homebase.';
