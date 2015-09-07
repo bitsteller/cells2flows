@@ -1,5 +1,5 @@
-DROP MATERIALIZED VIEW IF EXISTS cell_factors CASCADE;
-CREATE MATERIALIZED VIEW cell_factors AS
+DROP MATERIALIZED VIEW IF EXISTS user_factors CASCADE;
+CREATE MATERIALIZED VIEW user_factors AS
 (
  SELECT homebase.user_id,
     cell_factors.day,
