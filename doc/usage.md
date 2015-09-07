@@ -29,6 +29,14 @@ All configuration parameters are set in the file `config.py`. The available para
 - `CELLS` (optional):  a sequence of cell ids to use for the computation, be careful that after antenna clustering ids might change. If the this paramter is omitted, all cells are used by default.
 - `TRIPS` (optional): trip ids to use, if not set all loaded trips are used
 
+# Additional parameters
+
+Observer that when running the full experiment, you need to adjust the additional parameters in the beginning of the following files:
+
+	* `trip_scaling.py` (population)
+	*  `od.py` (e.g. trip-time distribution related parameters and weekdays to consider)
+
+See the comments in these files for more info about each parameter.
 
 # Run the full traffic assignment procedure
 	
