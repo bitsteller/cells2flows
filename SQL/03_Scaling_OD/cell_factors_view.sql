@@ -1,4 +1,6 @@
-﻿INSERT INTO cell_factors
+﻿DELETE MATERIALIZED VIEW IF EXISTS cell_factors;
+CREATE MATERIALIZED VIEW cell_factors AS
+(
  SELECT homebase.antenna_id,
     day.day,
     count(DISTINCT trips.user_id) AS active_users,
@@ -8,8 +10,9 @@
    FROM trips,
     homebase,
     user_home_count,
-    generate_series('2013-01-07 00:00:00'::timestamp without time zone, '2013-01-20 00:00:00'::timestamp without time zone, '1 day'::interval) day(day),
+    generate_series(MIN(start_time), MAX(start_time), '1 day'::interval) AS day,
     cell_population
-  WHERE homebase.antenna_id <= 470 AND homebase.user_id = trips.user_id AND homebase.antenna_id = user_home_count.antenna_id AND trips.start_time >= day.day AND trips.start_time <= (day.day + '1 day'::interval) AND cell_population.antenna_id = homebase.antenna_id
+  WHERE homebase.antenna_id = ANY(%(cells)s) AND homebase.user_id = trips.user_id AND homebase.antenna_id = user_home_count.antenna_id AND trips.start_time >= day.day AND trips.start_time <= (day.day + '1 day'::interval) AND cell_population.antenna_id = homebase.antenna_id
   GROUP BY homebase.antenna_id, user_home_count.no_users, day.day, cell_population.population
-  ORDER BY homebase.antenna_id, day.day;
+  ORDER BY homebase.antenna_id, day.day
+) WITH DATA;
