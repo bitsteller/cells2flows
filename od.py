@@ -10,6 +10,7 @@ import util, config #local modules
 WEEKDAYS = [1,2,3,4] #array of weekdays to consider trips from (0=sunday,...6=saturday)
 SPEED = 50 #average travel speed (km/h) assumed in order to calculate the latest possible start time of the trip
 MAX_INTERVAL = 60 #the maximum duration of the trip start interval (minutes) to consider the trip well-defined 
+OD_SPECIFIC_TIMEDIST_THRESHOLD = 8 #minimum number of trips in an OD pair in order to use the OD specific trip-timedist instead of the general one
 
 def fetch_timedist():
 	"""Fetches the time distribution of trips from the database by counting 
@@ -93,7 +94,7 @@ def calculate_od(args):
             #50km/h since the computed end time is before the start
             #time. Skipping...
 			continue
-		elif start_interval_length < 60: #only count trips for time dist with precise trip start info
+		elif start_interval_length < MAX_INTERVAL: #only count trips for time dist with precise trip start info
 			interval = int(((start_interval_ends[i]/60 - start_interval_length/2) % (24*60))/10) #10min intervals
 			no_trips[interval] += 1
 
@@ -108,7 +109,7 @@ def calculate_od(args):
 
 		weight = [0.0] * 24*6 #weights for the trip in 10min intervals
 		weight_function = lambda trips, dist: scale_factor*float(trips)/float(sum(dist[start_interval:end_interval+1])) #scale * trips/total_trips
-		if sum(no_trips[start_interval:end_interval+1]) >= 8: #enough time dist for this OD info available
+		if sum(no_trips[start_interval:end_interval+1]) >= OD_SPECIFIC_TIMEDIST_THRESHOLD: #enough time dist for this OD info available
 			weight[start_interval:end_interval+1] = [weight_function(trips, no_trips) for trips in no_trips[start_interval:end_interval+1]]
 		else: #otherwise use timedist for all trips
 			weight[start_interval:end_interval+1] = [weight_function(trips, timedist) for trips in timedist[start_interval:end_interval+1]]
@@ -162,5 +163,3 @@ if __name__ == '__main__':
 	args = ((o, d) for o, d in util.od_chunks(5))
 	mapper = util.MapReduce(fetch_trips, calculate_od)
 	mapper(args, pipe = True, length = len(config.CELLS)*len(config.CELLS)/5 + len(config.CELLS))
-
-	#calculate_od((1,5,timedist)) #test
