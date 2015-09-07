@@ -13,7 +13,7 @@ CREATE MATERIALIZED VIEW cell_factors AS
     user_home_count,
     days,
     cell_population
-  WHERE homebase.antenna_id = ANY(%(cells)s) AND homebase.user_id = trips.user_id AND homebase.antenna_id = user_home_count.antenna_id AND trips.start_time >= day.day AND trips.start_time <= (day.day + '1 day'::interval) AND cell_population.antenna_id = homebase.antenna_id
+  WHERE homebase.antenna_id = ANY(%(cells)s) AND homebase.user_id = trips.user_id AND homebase.antenna_id = user_home_count.antenna_id AND trips.start_time >= days.day AND trips.start_time <= (days.day + '1 day'::interval) AND cell_population.antenna_id = homebase.antenna_id
   GROUP BY homebase.antenna_id, user_home_count.no_users, day.day, cell_population.population
   ORDER BY homebase.antenna_id, day.day
 ) WITH DATA;
