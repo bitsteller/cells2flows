@@ -9,18 +9,22 @@ cur = conn.cursor()
 POPULATION = 13508715 #number of inhabitants in the area covered by all cells
 
 
-print("Creating cell population view (1/4)...")
+print("Creating cell population view (1/5)...")
 cur.execute(open("SQL/03_Scaling_OD/cell_population_view.sql", 'r').read(), {"population": POPULATION})
 conn.commit()
 
-print("Creating cell_factors view (2/4)...")
+print("Creating cell_factors view (2/5)...")
 cur.execute(open("SQL/03_Scaling_OD/cell_factors_view.sql", 'r').read(), {"cells": config.CELLS})
 conn.commit()
 
-print("Creating user_factors view (3/4)...")
+print("Creating user_factors view (3/5)...")
 cur.execute(open("SQL/03_Scaling_OD/user_factors_view.sql", 'r').read())
 conn.commit()
 
-print("Creating trip_factors view (4/4)...")
+print("Creating trip_factors view (4/5)...")
+cur.execute(open("SQL/03_Scaling_OD/trip_factors_view.sql", 'r').read())
+conn.commit()
+
+print("Creating trip_with_factors view (5/5)...")
 cur.execute(open("SQL/03_Scaling_OD/trip_factors_view.sql", 'r').read())
 conn.commit()
