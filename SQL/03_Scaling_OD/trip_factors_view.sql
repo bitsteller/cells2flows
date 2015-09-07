@@ -1,4 +1,4 @@
-DROP MATERIALIZED VIEW IF EXISTS trip_factors;
+DROP MATERIALIZED VIEW IF EXISTS trip_factors CASCADE;
 CREATE MATERIALIZED VIEW trip_factors AS
 ( SELECT trips.id AS trip_id, user_factors.trip_scale_factor 
    FROM trips, user_factors

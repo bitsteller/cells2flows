@@ -1,4 +1,4 @@
-DROP MATERIALIZED VIEW IF EXISTS cell_factors;
+DROP MATERIALIZED VIEW IF EXISTS cell_factors CASCADE;
 CREATE MATERIALIZED VIEW cell_factors AS
 (
  WITH days AS (SELECT generate_series(MIN(start_time), MAX(start_time), '1 day'::interval) AS day FROM trips)
